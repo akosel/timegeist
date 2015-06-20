@@ -1,0 +1,41 @@
+body {
+  font-family: Futura, Montserrat, sans-serif;
+  padding: 0;
+  margin: 0;
+  background-color: #333;
+  color: #fffc64; }
+
+main {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: auto;
+  margin: auto;
+  width: 50%;
+  height: 50%; }
+
+.main-modal {
+  position: relative;
+  text-align: center; }
+
+input {
+  padding: 20px;
+  font-size: 24px;
+  color: #5a5a5a;
+  border-width: 5px 5px 5px 5px;
+  border-color: #fffc64;
+  border-style: none solid solid none; }
+
+.go-time {
+  padding: 10px;
+  color: #9DFF64;
+  background-color: #fff;
+  border: 3px solid #9DFF64;
+  margin: 20px auto;
+  width: 250px;
+  cursor: pointer; }
+  .go-time:hover {
+    background-color: #9DFF64;
+    color: #fff; }
