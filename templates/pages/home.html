@@ -7,9 +7,250 @@
     <main>
     <section class="main-modal">
       <h1>Timegeist</h1>
-      <input type="text" />
+      <input id="user-year" type="number" value=1900 min=1900 max=2015/>
       <div class="go-time"><span>Go Time</span></div>
+      <div class="message-zone"></div>
     </section>
     </main>
   </body>
+  <script>
+
+    window.onload = init;
+    var context;
+    var bufferLoader;
+    var CrossfadePlaylistSample;
+    
+    function init() {
+      // Fix up prefixing
+      window.AudioContext = window.AudioContext || window.webkitAudioContext;
+      context = new AudioContext();
+    }
+
+    var $go = document.querySelector('.go-time');
+    var $input = document.querySelector('#user-year');
+    var $messageZone = document.querySelector('.message-zone');
+    $go.addEventListener('click', function(event) {
+      console.log($go, $input.value);
+      if ($input.value) {
+        getEvents($input.value);
+        searchTracks($input.value, function(response) {
+          console.log($input.value, response);
+        });
+      } else {
+        // TODO error validation or just always have default value
+        $messageZone.textContent = 'You done messed up.';
+      }
+    });
+
+    // Spotify Stuff
+
+    function fetchTrack(id, callback) {
+      get('https://api.spotify.com/v1/tracks/' + id, function() {
+        callback(response);
+      });
+    };
+
+    function searchTracks(query, callback) {
+      var jsonObj, urlList;
+      get('https://api.spotify.com/v1/search?q=' + query + '&type=track', function(xhr) {
+        jsonObj = JSON.parse(xhr.responseText);
+        console.log(jsonObj);
+        //var trackNo = 0;
+        //audioObject = new Audio(jsonObj.tracks.items[trackNo].preview_url);
+        //audioObject.play();
+        //trackNo += 1;
+        //var musicInterval = setInterval(function() {
+        //  audioObject = new Audio(jsonObj.tracks.items[trackNo].preview_url);
+        //  audioObject.play();
+        //  trackNo += 1;
+        //  if (trackNo === jsonObj.tracks.items.length - 1) {
+        //    trackNo = 0;
+        //  }
+        //}, 25000);
+        urlList = jsonObj.tracks.items.map(function(track) {
+          return track.preview_url;
+        });
+    
+        if (bufferLoader) {
+
+          console.log('Just need to update the bufferLoader');
+          bufferLoader.urlList = urlList;
+          bufferLoader.bufferList = [];
+          bufferLoader.loadCount = 0;
+        } else {
+          bufferLoader = new BufferLoader(
+            context,
+            urlList,
+            finishedLoading
+          );
+        }
+    
+        bufferLoader.load();
+      });
+    };
+
+
+    // Nice helpers from http://www.html5rocks.com/en/tutorials/webaudio/intro/
+    function BufferLoader(context, urlList, callback) {
+      this.context = context;
+      this.urlList = urlList;
+      this.onload = callback;
+      this.bufferList = new Array();
+      this.loadCount = 0;
+    }
+    
+    BufferLoader.prototype.loadBuffer = function(url, index) {
+      // Load buffer asynchronously
+      var request = new XMLHttpRequest();
+      request.open("GET", url, true);
+      request.responseType = "arraybuffer";
+    
+      var loader = this;
+    
+      request.onload = function() {
+        // Asynchronously decode the audio file data in request.response
+        loader.context.decodeAudioData(
+          request.response,
+          function(buffer) {
+            if (!buffer) {
+              alert('error decoding file data: ' + url);
+              return;
+            }
+            loader.bufferList[index] = buffer;
+            if (++loader.loadCount == loader.urlList.length)
+              loader.onload(loader.bufferList);
+          },
+          function(error) {
+            console.error('decodeAudioData error', error);
+            loader.bufferList[index] = buffer;
+            if (++loader.loadCount == loader.urlList.length)
+              loader.onload(loader.bufferList);
+          }
+        );
+      }
+    
+      request.onerror = function() {
+        alert('BufferLoader: XHR error');
+      }
+    
+      request.send();
+    }
+    
+    BufferLoader.prototype.load = function() {
+      for (var i = 0; i < this.urlList.length; ++i)
+      this.loadBuffer(this.urlList[i], i);
+    }
+    
+    function finishedLoading(bufferList) {
+      console.log('We are finished loading for sure');
+      // Create two sources and play them both together.
+      if (CrossfadePlaylistSample) {
+        console.log('We only need an update');
+        CrossfadePlaylistSample.bufferList = bufferList;
+        CrossfadePlaylistSample.playIdx = 0;
+        return;
+      }
+
+      CrossfadePlaylistSample = {
+        FADE_TIME: 1, // Seconds
+        playing: false,
+        playIdx: 0,
+        bufferList: bufferList
+      };
+      
+      CrossfadePlaylistSample.play = function() {
+        var ctx = this;
+        playHelper();
+      
+        function createSource(buffer) {
+          var source = context.createBufferSource();
+          var gainNode = context.createGain ? context.createGain() : context.createGainNode();
+          source.buffer = buffer;
+          // Connect source to gain.
+          source.connect(gainNode);
+          // Connect gain to destination.
+          gainNode.connect(context.destination);
+      
+          return {
+            source: source,
+            gainNode: gainNode
+          };
+        }
+      
+        function playHelper() {
+          ctx.playIdx = ctx.playIdx === ctx.bufferList.length ? 0 : ctx.playIdx + 1;
+          var bufferNow = ctx.bufferList[ctx.playIdx];
+          var playNow = createSource(bufferNow);
+          var source = playNow.source;
+          ctx.source = source;
+          var gainNode = playNow.gainNode;
+          var duration = bufferNow.duration;
+          var currTime = context.currentTime;
+          // Fade the playNow track in.
+          gainNode.gain.linearRampToValueAtTime(0, currTime);
+          gainNode.gain.linearRampToValueAtTime(1, currTime + ctx.FADE_TIME);
+          // Play the playNow track.
+          source.start ? source.start(0) : source.noteOn(0);
+          // At the end of the track, fade it out.
+          gainNode.gain.linearRampToValueAtTime(1, currTime + duration-ctx.FADE_TIME);
+          gainNode.gain.linearRampToValueAtTime(0, currTime + duration);
+          // Schedule a recursive track change with the tracks swapped.
+          var recurse = arguments.callee;
+          ctx.timer = setTimeout(function() {
+            recurse();
+          }, (duration - ctx.FADE_TIME) * 1000);
+        }
+      
+      };
+
+      CrossfadePlaylistSample.stop = function() {
+        clearTimeout(this.timer);
+        this.source.stop ? this.source.stop(0) : this.source.noteOff(0);
+      };
+      
+      CrossfadePlaylistSample.next = function() {
+        clearTimeout(this.timer);
+        this.source.stop ? this.source.stop(0) : this.source.noteOff(0);
+      };
+      
+      CrossfadePlaylistSample.toggle = function() {
+        this.playing ? this.stop() : this.play();
+        this.playing = !this.playing;
+      };
+      CrossfadePlaylistSample.play();
+    }
+
+
+
+    // Helpers
+    function getEvents(year) {
+      var json, msgIdx;
+      get('/api/v1.0/events/' + year, function(xhr) {
+        json = JSON.parse(xhr.responseText);
+        console.log(json);
+        if (json.status === 'empty') {
+          $messageZone.textContent = 'I got nothin\'';
+        } else {
+          msgIdx = Math.round(Math.random() * (json.length - 1));
+          $messageZone.textContent = json[msgIdx][1];
+        }
+      });
+    }
+    function getSongs(year) {
+      get('/api/v1.0/songs/' + year, function(xhr) {
+        console.log(xhr);
+      });
+    }
+    function get(url, callback) {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', url);
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200 && callback) {
+          callback(xhr);
+        }
+      }
+      xhr.send();
+    }
+
+  </script>
 </html>

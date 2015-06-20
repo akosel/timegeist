@@ -6,6 +6,8 @@ from flask import Flask, render_template, request
 # from flask.ext.sqlalchemy import SQLAlchemy
 import logging
 from logging import Formatter, FileHandler
+import json
+import os
 
 #----------------------------------------------------------------------------#
 # App Config.
@@ -43,28 +45,25 @@ def login_required(test):
 def home():
     return render_template('pages/home.html')
 
+@app.route('/api/v1.0/events/<year>')
+def get_year_events(year):
+    # TODO break this up by year, or even better, use an actual database. Or redis!
+    path = 'static/data/tidbits/tidbits_{0}.json'.format(year)
+    if os.path.isfile(path):
+        with open(path, 'r') as f:
+            year_data = json.load(f)
+            return json.dumps(year_data)
+    else:
+        return json.dumps({ 'status': 'empty' })
 
-@app.route('/about')
-def about():
-    return render_template('pages/about.html')
+@app.route('/api/v1.0/songs/<year>')
+def get_year_songs(year):
+    # TODO get hits by year
+    #with open('static/data/songs.json', 'r') as f:
+    #    all_data = json.load(f)
+    #    return json.dumps(all_data[year])
+    return json.dumps({ 'status': 'unimplemented' })
 
-
-@app.route('/login')
-def login():
-    form = LoginForm(request.form)
-    return render_template('forms/login.html', form=form)
-
-
-@app.route('/register')
-def register():
-    form = RegisterForm(request.form)
-    return render_template('forms/register.html', form=form)
-
-
-@app.route('/forgot')
-def forgot():
-    form = ForgotForm(request.form)
-    return render_template('forms/forgot.html', form=form)
 
 # Error handlers.
 
@@ -95,7 +94,7 @@ if not app.debug:
 
 # Default port:
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
 
 # Or specify port manually:
 '''

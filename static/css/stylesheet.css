@@ -13,8 +13,8 @@ main {
   bottom: 0;
   overflow: auto;
   margin: auto;
-  width: 50%;
-  height: 50%; }
+  width: 1140px;
+  height: 75%; }
 
 .main-modal {
   position: relative;
