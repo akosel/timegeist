@@ -19,7 +19,7 @@
     var context;
     var bufferLoader;
     var CrossfadePlaylistSample;
-    
+
     function init() {
       // Fix up prefixing
       window.AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -29,16 +29,32 @@
     var $go = document.querySelector('.go-time');
     var $input = document.querySelector('#user-year');
     var $messageZone = document.querySelector('.message-zone');
-    $go.addEventListener('click', function(event) {
-      console.log($go, $input.value);
+    var activeYear;
+    var eventPublished = setInterval(function() {
       if ($input.value) {
         getEvents($input.value);
+      } else {
+        // TODO error validation or just always have default value
+        // $messageZone.textContent = 'You done messed up.';
+      }
+    }, 5000);
+    document.onkeyup = function(e) {
+      if (e.keyCode === 13) {
+        console.log('enter pressed');
+        if (activeYear !== $input.value) {
+          activeYear = $input.value;
+          searchTracks($input.value, function(response) {
+            console.log($input.value, response);
+          });
+        }
+      }
+    };
+    $go.addEventListener('click', function(event) {
+      if (activeYear !== $input.value) {
+        activeYear = $input.value;
         searchTracks($input.value, function(response) {
           console.log($input.value, response);
         });
-      } else {
-        // TODO error validation or just always have default value
-        $messageZone.textContent = 'You done messed up.';
       }
     });
 
@@ -70,7 +86,6 @@
         urlList = jsonObj.tracks.items.map(function(track) {
           return track.preview_url;
         });
-    
         if (bufferLoader) {
 
           console.log('Just need to update the bufferLoader');
@@ -84,7 +99,6 @@
             finishedLoading
           );
         }
-    
         bufferLoader.load();
       });
     };
@@ -98,15 +112,12 @@
       this.bufferList = new Array();
       this.loadCount = 0;
     }
-    
     BufferLoader.prototype.loadBuffer = function(url, index) {
       // Load buffer asynchronously
       var request = new XMLHttpRequest();
       request.open("GET", url, true);
       request.responseType = "arraybuffer";
-    
       var loader = this;
-    
       request.onload = function() {
         // Asynchronously decode the audio file data in request.response
         loader.context.decodeAudioData(
@@ -114,7 +125,6 @@
           function(buffer) {
             if (!buffer) {
               alert('error decoding file data: ' + url);
-              return;
             }
             loader.bufferList[index] = buffer;
             if (++loader.loadCount == loader.urlList.length)
@@ -128,19 +138,17 @@
           }
         );
       }
-    
       request.onerror = function() {
         alert('BufferLoader: XHR error');
       }
-    
       request.send();
     }
-    
+
     BufferLoader.prototype.load = function() {
       for (var i = 0; i < this.urlList.length; ++i)
       this.loadBuffer(this.urlList[i], i);
     }
-    
+
     function finishedLoading(bufferList) {
       console.log('We are finished loading for sure');
       // Create two sources and play them both together.
@@ -157,11 +165,11 @@
         playIdx: 0,
         bufferList: bufferList
       };
-      
+
       CrossfadePlaylistSample.play = function() {
         var ctx = this;
         playHelper();
-      
+
         function createSource(buffer) {
           var source = context.createBufferSource();
           var gainNode = context.createGain ? context.createGain() : context.createGainNode();
@@ -170,13 +178,12 @@
           source.connect(gainNode);
           // Connect gain to destination.
           gainNode.connect(context.destination);
-      
           return {
             source: source,
             gainNode: gainNode
           };
         }
-      
+
         function playHelper() {
           ctx.playIdx = ctx.playIdx === ctx.bufferList.length ? 0 : ctx.playIdx + 1;
           var bufferNow = ctx.bufferList[ctx.playIdx];
@@ -200,19 +207,18 @@
             recurse();
           }, (duration - ctx.FADE_TIME) * 1000);
         }
-      
       };
 
       CrossfadePlaylistSample.stop = function() {
         clearTimeout(this.timer);
         this.source.stop ? this.source.stop(0) : this.source.noteOff(0);
       };
-      
+
       CrossfadePlaylistSample.next = function() {
         clearTimeout(this.timer);
         this.source.stop ? this.source.stop(0) : this.source.noteOff(0);
       };
-      
+
       CrossfadePlaylistSample.toggle = function() {
         this.playing ? this.stop() : this.play();
         this.playing = !this.playing;

@@ -52,6 +52,7 @@ def get_year_events(year):
     if os.path.isfile(path):
         with open(path, 'r') as f:
             year_data = json.load(f)
+            print year_data
             return json.dumps(year_data)
     else:
         return json.dumps({ 'status': 'empty' })
@@ -59,10 +60,13 @@ def get_year_events(year):
 @app.route('/api/v1.0/songs/<year>')
 def get_year_songs(year):
     # TODO get hits by year
-    #with open('static/data/songs.json', 'r') as f:
-    #    all_data = json.load(f)
-    #    return json.dumps(all_data[year])
-    return json.dumps({ 'status': 'unimplemented' })
+    path = 'static/data/songs/charts_{0}.json'.format(year)
+    if os.path.isfile(path):
+        with open(path, 'r') as f:
+            all_data = json.load(f)
+            return json.dumps(all_data)
+    else:
+        return json.dumps({ 'status': 'empty' })
 
 
 # Error handlers.
