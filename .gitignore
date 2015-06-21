@@ -1,5 +1,6 @@
 node_modules
 *.log
+config
 *pyc
 *swp
 *key
