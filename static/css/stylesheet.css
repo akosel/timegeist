@@ -1,9 +1,19 @@
 body {
-  font-family: Futura, Montserrat, sans-serif;
+  font-family: "Gill Sans", Montserrat, sans-serif;
   padding: 0;
   margin: 0;
-  background-color: #333;
-  color: #fffc64; }
+  background-color: #F0D2D1;
+  color: #ca615e; }
+
+.logo::before {
+  content: '';
+  background: url(/static/img/timegeist.svg) no-repeat;
+  width: 40px;
+  height: 40px;
+  float: left; }
+
+section {
+  box-sizing: border-box; }
 
 main {
   position: absolute;
@@ -11,31 +21,39 @@ main {
   left: 0;
   right: 0;
   bottom: 0;
-  overflow: auto;
+  overflow: visible;
   margin: auto;
   width: 1140px;
-  height: 75%; }
+  height: 100%; }
 
-.main-modal {
+#track-info {
+  display: inline-block;
+  width: 50%; }
+
+#main-input {
   position: relative;
+  display: inline-block;
+  width: 50%;
   text-align: center; }
+  #main-input input {
+    padding: 20px;
+    font-size: 24px;
+    color: #5a5a5a;
+    border-width: 5px 5px 5px 5px;
+    border-color: #ca615e;
+    border-style: none solid solid none; }
+  #main-input #go-time {
+    padding: 10px;
+    color: #42CAFD;
+    background-color: #fff;
+    border: 3px solid #42CAFD;
+    margin: 20px auto;
+    font-size: 18px;
+    width: 250px;
+    cursor: pointer; }
+    #main-input #go-time:hover {
+      background-color: #42CAFD;
+      color: #fff; }
 
-input {
-  padding: 20px;
-  font-size: 24px;
-  color: #5a5a5a;
-  border-width: 5px 5px 5px 5px;
-  border-color: #fffc64;
-  border-style: none solid solid none; }
-
-.go-time {
-  padding: 10px;
-  color: #9DFF64;
-  background-color: #fff;
-  border: 3px solid #9DFF64;
-  margin: 20px auto;
-  width: 250px;
-  cursor: pointer; }
-  .go-time:hover {
-    background-color: #9DFF64;
-    color: #fff; }
+.message-zone {
+  text-align: left; }

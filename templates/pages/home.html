@@ -5,12 +5,20 @@
   </head>
   <body>
     <main>
-    <section class="main-modal">
-      <h1>Timegeist</h1>
-      <input id="user-year" type="number" value=1900 min=1900 max=2015/>
-      <div class="go-time"><span>Go Time</span></div>
-      <div class="message-zone"></div>
-    </section>
+    <h1 class="logo">TimeGeist</h1>
+      <section id="track-info">
+        <p id="track-name"></p>
+        <p id="track-artist"></p>
+        <p id="track-notes"></p>
+        <div class="track-buttons">
+          <div class="button" id="good-track"></div>
+          <div class="button" id="bad-track"></div>
+        </div>
+      </section><section id="main-input">
+        <input id="user-year" type="number" value=1900 min=1900 max=2015/>
+        <div class="button" id="go-time"><span>Go Time</span></div>
+      </section>
+      <section class="message-zone"></section>
     </main>
   </body>
   <script>
@@ -26,76 +34,110 @@
       context = new AudioContext();
     }
 
-    var $go = document.querySelector('.go-time');
+    var $go = document.querySelector('#go-time');
     var $input = document.querySelector('#user-year');
     var $messageZone = document.querySelector('.message-zone');
     var activeYear;
     var eventPublished = setInterval(function() {
       if ($input.value) {
-        getEvents($input.value);
+        getEvents(activeYear);
       } else {
         // TODO error validation or just always have default value
         // $messageZone.textContent = 'You done messed up.';
       }
-    }, 5000);
+    }, 7000);
+
+    var coastMode = true;
+    var coasting = setInterval(function() {
+      if (coastMode) {
+        $input.value = parseInt(activeYear) + 1;
+        fireItUp();
+      } else {
+        clearInterval(coasting);
+      }
+    }, 25000);
     document.onkeyup = function(e) {
       if (e.keyCode === 13) {
-        console.log('enter pressed');
         if (activeYear !== $input.value) {
-          activeYear = $input.value;
-          searchTracks($input.value, function(response) {
-            console.log($input.value, response);
-          });
+          fireItUp();
         }
       }
     };
     $go.addEventListener('click', function(event) {
       if (activeYear !== $input.value) {
-        activeYear = $input.value;
-        searchTracks($input.value, function(response) {
-          console.log($input.value, response);
-        });
+        fireItUp();
       }
     });
 
+    function getMessageForYear(year) {
+      // TODO
+      if (year < 1910) return 'Old timey times.';
+      if (year < 1920) return 'The War to End All Wars.';
+      if (year < 1930) return 'Roaring 20s. Prohibition.';
+      if (year < 1940) return 'Depression. Roosevelt. Rise of fascism.';
+      if (year < 1950) return 'Wars. Big Wars.';
+      if (year < 1960) return 'McCarthyism and the beginning of the Cold War';
+      if (year < 1970) return 'Vietnam. Hippies. Mad Men.';
+      if (year < 1980) return 'Sex. Drugs. Rock & Roll.';
+      if (year < 1990) return 'Computers? Arena Rock. Back to the Future';
+      if (year < 2000) return 'Internet Age. Globalization.' 
+      if (year < 2010) return 'The aughts. iPods. Iraq.';
+      if (year < 2020) return 'It\'s still happening.';
+
+      return 'YOLO';
+    }
+
+    function fireItUp() {
+      while ($messageZone.firstChild) {
+        $messageZone.removeChild($messageZone.firstChild);
+      }
+      activeYear = $input.value;
+      sendMessage('Welcome to ' + activeYear + ' - ' + getMessageForYear(activeYear), 'h1');
+      searchTracks($input.value, function(response) {
+        console.log($input.value, response);
+      });
+    }
+
+    function sendMessage(content, elType) {
+      elType = elType || 'p';
+      var $p = document.createElement(elType);
+      $p.textContent = content;
+      $firstP = $messageZone.querySelector(elType);
+      $messageZone.insertBefore($p, $firstP);
+    }
+
     // Spotify Stuff
 
-    function fetchTrack(id, callback) {
-      get('https://api.spotify.com/v1/tracks/' + id, function() {
-        callback(response);
-      });
-    };
+    function updateTrackInfo(track) {
+      console.log('Now playing', track);
+      var $name = document.querySelector('#track-name');
+      var $artist = document.querySelector('#track-artist');
+      //var $notes = document.querySelector('#track-notes');
+      $name.textContent = track.name;
+      $artist.textContent = track.artist;
+      //$notes.textContent = track.notes;
+    }
 
     function searchTracks(query, callback) {
-      var jsonObj, urlList;
-      get('https://api.spotify.com/v1/search?q=' + query + '&type=track', function(xhr) {
-        jsonObj = JSON.parse(xhr.responseText);
-        console.log(jsonObj);
-        //var trackNo = 0;
-        //audioObject = new Audio(jsonObj.tracks.items[trackNo].preview_url);
-        //audioObject.play();
-        //trackNo += 1;
-        //var musicInterval = setInterval(function() {
-        //  audioObject = new Audio(jsonObj.tracks.items[trackNo].preview_url);
-        //  audioObject.play();
-        //  trackNo += 1;
-        //  if (trackNo === jsonObj.tracks.items.length - 1) {
-        //    trackNo = 0;
-        //  }
-        //}, 25000);
-        urlList = jsonObj.tracks.items.map(function(track) {
+      var trackList;
+      //get('https://api.spotify.com/v1/search?q=' + query + '&type=track', function(xhr) {
+      get('/api/v1.0/songs/' + query, function(xhr) {
+        trackList = JSON.parse(xhr.responseText);
+        trackList = trackList.filter(function(track) {
           return track.preview_url;
         });
+
         if (bufferLoader) {
 
           console.log('Just need to update the bufferLoader');
-          bufferLoader.urlList = urlList;
+          bufferLoader.trackList = trackList;
+          bufferLoader.urlList = [];
           bufferLoader.bufferList = [];
           bufferLoader.loadCount = 0;
         } else {
           bufferLoader = new BufferLoader(
             context,
-            urlList,
+            trackList,
             finishedLoading
           );
         }
@@ -105,9 +147,9 @@
 
 
     // Nice helpers from http://www.html5rocks.com/en/tutorials/webaudio/intro/
-    function BufferLoader(context, urlList, callback) {
+    function BufferLoader(context, trackList, callback) {
       this.context = context;
-      this.urlList = urlList;
+      this.trackList = trackList;
       this.onload = callback;
       this.bufferList = new Array();
       this.loadCount = 0;
@@ -128,13 +170,12 @@
             }
             loader.bufferList[index] = buffer;
             if (++loader.loadCount == loader.urlList.length)
-              loader.onload(loader.bufferList);
+              loader.onload(loader.bufferList, loader.trackList);
           },
           function(error) {
-            console.error('decodeAudioData error', error);
-            loader.bufferList[index] = buffer;
+            console.log('decodeAudioData error', error);
             if (++loader.loadCount == loader.urlList.length)
-              loader.onload(loader.bufferList);
+              loader.onload(loader.bufferList, loader.trackList);
           }
         );
       }
@@ -145,16 +186,21 @@
     }
 
     BufferLoader.prototype.load = function() {
+      this.urlList = this.trackList
+          .map(function(track) {
+            return track.preview_url;
+          });
       for (var i = 0; i < this.urlList.length; ++i)
       this.loadBuffer(this.urlList[i], i);
     }
 
-    function finishedLoading(bufferList) {
+    function finishedLoading(bufferList, trackList) {
       console.log('We are finished loading for sure');
       // Create two sources and play them both together.
       if (CrossfadePlaylistSample) {
         console.log('We only need an update');
         CrossfadePlaylistSample.bufferList = bufferList;
+        CrossfadePlaylistSample.trackList = trackList;
         CrossfadePlaylistSample.playIdx = 0;
         return;
       }
@@ -163,7 +209,8 @@
         FADE_TIME: 1, // Seconds
         playing: false,
         playIdx: 0,
-        bufferList: bufferList
+        bufferList: bufferList,
+        trackList: trackList
       };
 
       CrossfadePlaylistSample.play = function() {
@@ -185,7 +232,13 @@
         }
 
         function playHelper() {
-          ctx.playIdx = ctx.playIdx === ctx.bufferList.length ? 0 : ctx.playIdx + 1;
+          ctx.playIdx = ctx.playIdx === ctx.bufferList.length - 1 ? 0 : ctx.playIdx;
+          if(!ctx.bufferList[ctx.playIdx]) {
+            playIdx += 1;
+            arguments.callee();
+          }
+
+          updateTrackInfo(ctx.trackList[ctx.playIdx]);
           var bufferNow = ctx.bufferList[ctx.playIdx];
           var playNow = createSource(bufferNow);
           var source = playNow.source;
@@ -204,6 +257,7 @@
           // Schedule a recursive track change with the tracks swapped.
           var recurse = arguments.callee;
           ctx.timer = setTimeout(function() {
+            ctx.playIdx += 1;
             recurse();
           }, (duration - ctx.FADE_TIME) * 1000);
         }
@@ -233,12 +287,11 @@
       var json, msgIdx;
       get('/api/v1.0/events/' + year, function(xhr) {
         json = JSON.parse(xhr.responseText);
-        console.log(json);
         if (json.status === 'empty') {
-          $messageZone.textContent = 'I got nothin\'';
+          // TODO not sure what to do in this case
         } else {
           msgIdx = Math.round(Math.random() * (json.length - 1));
-          $messageZone.textContent = json[msgIdx][1];
+          sendMessage(json[msgIdx][1]);
         }
       });
     }

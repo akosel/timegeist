@@ -8,6 +8,7 @@ import logging
 from logging import Formatter, FileHandler
 import json
 import os
+import random
 
 #----------------------------------------------------------------------------#
 # App Config.
@@ -52,7 +53,7 @@ def get_year_events(year):
     if os.path.isfile(path):
         with open(path, 'r') as f:
             year_data = json.load(f)
-            print year_data
+            year_data = [x for x in year_data if len(x[1]) > 100]
             return json.dumps(year_data)
     else:
         return json.dumps({ 'status': 'empty' })
@@ -64,7 +65,8 @@ def get_year_songs(year):
     if os.path.isfile(path):
         with open(path, 'r') as f:
             all_data = json.load(f)
-            return json.dumps(all_data)
+            random.shuffle(all_data)
+            return json.dumps(all_data[:30])
     else:
         return json.dumps({ 'status': 'empty' })
 
