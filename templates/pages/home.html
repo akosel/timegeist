@@ -53,6 +53,8 @@
       context = new AudioContext();
       sendMessage('', 'h1');
       getFontForYear($input.value);
+
+      // XXX slight hack/necessity to allow sound to play in iOS
       document.querySelector('body').addEventListener('touchstart', playSound, false);
     }
 
@@ -144,6 +146,10 @@
 
     var $trackInfo = document.querySelector('#track-info');
     function fireItUp() {
+      if (!$input.validity.valid) {
+        console.log('The input is invalid.');
+        return false;
+      }
       while ($messageZone.firstChild) {
         $messageZone.removeChild($messageZone.firstChild);
       }
