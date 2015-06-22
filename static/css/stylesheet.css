@@ -24,7 +24,7 @@ main {
   position: relative;
   overflow: auto;
   margin: auto; }
-  @media screen and (min-width: 720px) {
+  @media screen and (min-width: 630px) {
     main {
       width: 1140px; } }
 
@@ -52,7 +52,7 @@ main {
     width: 75%;
     font-size: 24px;
     vertical-align: middle; }
-    @media screen and (min-width: 720px) {
+    @media screen and (min-width: 630px) {
       #track-info #track-stats {
         padding-left: 30px; } }
   #track-info .button {
@@ -90,7 +90,7 @@ main {
   -webkit-box-shadow: 5px 5px 15px -9px #5a5a5a;
   -moz-box-shadow: 5px 5px 15px -9px #5a5a5a;
   box-shadow: 5px 5px 15px -9px #5a5a5a; }
-  @media screen and (min-width: 720px) {
+  @media screen and (min-width: 630px) {
     .button {
       margin: 20px auto;
       width: 350px; } }
@@ -100,7 +100,7 @@ main {
   font-size: 18px;
   line-height: 1.6em;
   margin-top: 60px; }
-  @media screen and (min-width: 720px) {
+  @media screen and (min-width: 630px) {
     .message-zone {
       width: 50%; } }
   .message-zone p {
