@@ -52,7 +52,6 @@ def get_year_events(year):
     if os.path.isfile(path):
         with open(path, 'r') as f:
             year_data = json.load(f)
-            year_data = [x for x in year_data if len(x[1]) > 100]
             return json.dumps(year_data)
     else:
         return json.dumps({ 'status': 'empty' })
