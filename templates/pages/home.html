@@ -2,21 +2,30 @@
   <head>
 
     <link rel="stylesheet" href="/static/css/stylesheet.css" type="text/css"/>
+    <script src="//use.typekit.net/uiq7hdf.js"></script>
+    <script>try{Typekit.load();}catch(e){}</script>
   </head>
   <body>
     <main>
     <h1 class="logo">TimeGeist</h1>
       <section id="track-info">
-        <p id="track-name"></p>
-        <p id="track-artist"></p>
-        <p id="track-notes"></p>
+        <h1>Select a year to begin! You can also just try a random year.</h1>
+        <div class="thumbnail" id="track-image"></div>
+        <div id="track-stats">
+          <p id="track-name"></p>
+          <p id="track-artist"></p>
+          <p id="track-notes"></p>
+        </div>
+        <div id="upcoming-tracks">
+        </div>
         <div class="track-buttons">
-          <div class="button" id="good-track"></div>
-          <div class="button" id="bad-track"></div>
+          <div class="button" id="good-track">Good Track!</div>
+          <div class="button" id="bad-track">So bad!</div>
         </div>
       </section><section id="main-input">
-        <input id="user-year" type="number" value=1900 min=1900 max=2015/>
-        <div class="button" id="go-time"><span>Go Time</span></div>
+        <input id="user-year" type="number" value=2001 min=1900 max=2015/>
+        <div class="button" id="go-time"><span>I want this year!</span></div>
+        <div class="button" id="go-random"><span>I want a random year!</span></div>
       </section>
       <section class="message-zone"></section>
     </main>
@@ -27,17 +36,29 @@
     var context;
     var bufferLoader;
     var CrossfadePlaylistSample;
+    var $go = document.querySelector('#go-time');
+    var $input = document.querySelector('#user-year');
+    var $messageZone = document.querySelector('.message-zone');
+    var activeYear;
 
     function init() {
       // Fix up prefixing
       window.AudioContext = window.AudioContext || window.webkitAudioContext;
       context = new AudioContext();
+      sendMessage('', 'h1');
+      getFontForYear($input.value);
+      document.querySelector('body').addEventListener('touchstart', playSound, false);
     }
 
-    var $go = document.querySelector('#go-time');
-    var $input = document.querySelector('#user-year');
-    var $messageZone = document.querySelector('.message-zone');
-    var activeYear;
+    function playSound(buffer) {
+      var source = context.createBufferSource(); // creates a sound source
+      source.buffer = buffer;                    // tell the source which sound to play
+      source.connect(context.destination);       // connect the source to the context's destination (the speakers)
+      source.start(0);                           // play the source now
+                                                 // note: on older systems, may have to use deprecated noteOn(time);
+    }
+
+
     var eventPublished = setInterval(function() {
       if ($input.value) {
         getEvents(activeYear);
@@ -51,7 +72,7 @@
     var coastMode = false;
     var coasting = setInterval(function() {
       if (coastMode) {
-        $input.value = parseInt(activeYear) + 1;
+        $input.value = parseInt(activeYear) < 2014 ? parseInt(activeYear) + 1 : 1900;
         fireItUp();
       } else {
         clearInterval(coasting);
@@ -69,17 +90,44 @@
         fireItUp();
       }
     });
+    function getRandomArbitrary(min, max) {
+      return Math.round(Math.random() * (max - min) + min);
+    }
+    document.querySelector('#go-random').addEventListener('click', function(event) {
+      $input.value = getRandomArbitrary(1899, 2014);
+      if (activeYear !== $input.value) {
+        fireItUp();
+      }
+    });
+
+    function getFontForYear(year) {
+      var $body = document.querySelector('main');
+      if (year < 1910) { $body.className = 'tk-ltc-broadway'; return; }
+      if (year < 1920) { $body.className = 'tk-ten'; return; }
+      if (year < 1930) { $body.className = 'tk-ltc-broadway'; return; }
+      if (year < 1940) { $body.className = 'tk-thirty'; return; }
+      if (year < 1950) { $body.className = 'tk-grafolita-script'; return; }
+      if (year < 1960) { $body.className = 'tk-clarendon-text-pro'; return; }
+      if (year < 1970) { $body.className = 'tk-futura-pt'; return; }
+      if (year < 1980) { $body.className = 'tk-cooper-black-std'; return; }
+      if (year < 1990) { $body.className = 'tk-eighty'; return; }
+      if (year < 2000) { $body.className = 'tk-ninety'; return; }
+      if (year < 2010) { $body.className = 'tk-aught'; return; }
+      if (year < 2020) { $body.className = 'tk-brandon-grotesque'; return; }
+
+      return;
+    }
 
     function getMessageForYear(year) {
       // TODO
       if (year < 1910) return 'Old timey times.';
-      if (year < 1920) return 'The War to End All Wars.';
+      if (year < 1920) return 'The War to End All Wars';
       if (year < 1930) return 'Roaring 20s. Prohibition.';
       if (year < 1940) return 'Depression. Roosevelt. Rise of fascism.';
       if (year < 1950) return 'Wars. Big Wars.';
       if (year < 1960) return 'McCarthyism and the beginning of the Cold War';
       if (year < 1970) return 'Vietnam. Hippies. Mad Men.';
-      if (year < 1980) return 'Sex. Drugs. Rock & Roll.';
+      if (year < 1980) return 'Groovy.';
       if (year < 1990) return 'Computers? Arena Rock. Back to the Future';
       if (year < 2000) return 'Internet Age. Globalization.' 
       if (year < 2010) return 'The aughts. iPods. Iraq.';
@@ -88,11 +136,14 @@
       return 'YOLO';
     }
 
+    var $trackInfo = document.querySelector('#track-info');
     function fireItUp() {
       while ($messageZone.firstChild) {
         $messageZone.removeChild($messageZone.firstChild);
       }
       activeYear = $input.value;
+      getFontForYear(activeYear);
+      clearTrackInfo();
       sendMessage('Welcome to ' + activeYear + ' - ' + getMessageForYear(activeYear), 'h1');
       searchTracks($input.value, function(response) {
         console.log($input.value, response);
@@ -107,17 +158,53 @@
       $messageZone.insertBefore($p, $firstP);
     }
 
-    // Spotify Stuff
-
     function updateTrackInfo(track) {
-      console.log('Now playing', track);
       var $name = document.querySelector('#track-name');
       var $artist = document.querySelector('#track-artist');
       //var $notes = document.querySelector('#track-notes');
       $name.textContent = track.name;
       $artist.textContent = track.artist;
       //$notes.textContent = track.notes;
+      $trackInfo.style.background = 'none';
+      if (track && track.album && track.album.images && track.album.images.length > 1) {
+        var albumImgUrl = track.album.images[1].url;
+        console.log(track);
+        document.querySelector('#track-image').style.background = 'url(' + albumImgUrl + ') no-repeat';
+        document.querySelector('#track-image').style.backgroundSize = 'contain';
+        document.querySelector('#track-image').style.display = 'inline-block';
+      }
     }
+
+    function clearTrackInfo() {
+      [].forEach.call($trackInfo.querySelectorAll('p, h1'), function($p) {
+        $p.textContent = '';
+      });
+      [].forEach.call($trackInfo.querySelectorAll('.thumbnail'), function($thumbnail) {
+        $thumbnail.style.background = 'none';
+        $thumbnail.style.display = 'none';
+      });
+      $trackInfo.querySelector('#track-image').style.display = 'none';
+      $trackInfo.style.background = 'url(/static/img/clock.svg) no-repeat scroll center center';
+      $trackInfo.style.backgroundSize = 'contain';
+    }
+
+    var addBufferImages = function(tracks) {
+      var $upcoming = document.querySelector('#upcoming-tracks');
+      while($upcoming.firstChild) {
+        $upcoming.removeChild($upcoming.firstChild);
+      }
+      var $div;
+      tracks.forEach(function(track) {
+        if (track && track.album && track.album.images && track.album.images.length > 1) {
+          $div = document.createElement('div');
+          var albumImgUrl = track.album.images[1].url;
+          $div.style.background = 'url(' + albumImgUrl + ') no-repeat';
+          $div.style.backgroundSize = 'contain';
+          $div.className = 'thumbnail upcoming';
+          $upcoming.appendChild($div);
+        }
+      });
+    };
 
     function searchTracks(query, callback) {
       var trackList;
@@ -203,6 +290,7 @@
         CrossfadePlaylistSample.bufferList = bufferList;
         CrossfadePlaylistSample.trackList = trackList;
         CrossfadePlaylistSample.playIdx = 0;
+        CrossfadePlaylistSample.next();
         return;
       }
 
@@ -232,19 +320,36 @@
           };
         }
 
+        function getNextTracks(num) {
+          num = num || 5;
+          var ub = ctx.trackList.length - 1;
+          num = num < ub ? num : ub;
+
+          if (ctx.playIdx + num - 1 < ub) {
+            return ctx.trackList.slice(ctx.playIdx + 1, ctx.playIdx + num);
+          } else {
+            var tailIndex = ctx.playIdx - ub;
+            var endSlice = ctx.trackList.slice(tailIndex);
+            var beginningSlice = ctx.trackList.slice(0, num + tailIndex);
+            return endSlice.concat(beginningSlice);
+          }
+        }
+
         function playHelper() {
           ctx.playIdx = ctx.playIdx === ctx.bufferList.length - 1 ? 0 : ctx.playIdx;
           if(!ctx.bufferList[ctx.playIdx]) {
-            playIdx += 1;
+            ctx.playIdx += 1;
             arguments.callee();
           }
 
           updateTrackInfo(ctx.trackList[ctx.playIdx]);
+          addBufferImages(getNextTracks());
           var bufferNow = ctx.bufferList[ctx.playIdx];
           var playNow = createSource(bufferNow);
           var source = playNow.source;
           ctx.source = source;
           var gainNode = playNow.gainNode;
+          ctx.gainNode = gainNode;
           var duration = bufferNow.duration;
           var currTime = context.currentTime;
           // Fade the playNow track in.
@@ -272,6 +377,15 @@
       CrossfadePlaylistSample.next = function() {
         clearTimeout(this.timer);
         this.source.stop ? this.source.stop(0) : this.source.noteOff(0);
+        this.playIdx += 1;
+        this.play();
+      };
+
+      CrossfadePlaylistSample.playTrack = function(playIdx) {
+        clearTimeout(this.timer);
+        this.source.stop ? this.source.stop(0) : this.source.noteOff(0);
+        this.playIdx += playIdx;
+        this.play();
       };
 
       CrossfadePlaylistSample.toggle = function() {

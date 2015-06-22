@@ -1,16 +1,18 @@
 body {
-  font-family: "Gill Sans", Montserrat, sans-serif;
+  font-family: "", Montserrat, sans-serif;
   padding: 0;
   margin: 0;
   background-color: #F0D2D1;
   color: #ca615e; }
 
-.logo::before {
-  content: '';
-  background: url(/static/img/timegeist.svg) no-repeat;
-  width: 40px;
-  height: 40px;
-  float: left; }
+.logo {
+  margin-bottom: 60px; }
+  .logo::before {
+    content: '';
+    background: url(/static/img/timegeist.svg) no-repeat;
+    width: 40px;
+    height: 40px;
+    float: left; }
 
 section {
   box-sizing: border-box; }
@@ -28,12 +30,40 @@ main {
 
 #track-info {
   display: inline-block;
-  width: 50%; }
+  vertical-align: top;
+  width: 75%;
+  height: 250px; }
+  #track-info .thumbnail {
+    width: 150px;
+    height: 150px;
+    display: inline-block;
+    vertical-align: middle;
+    -webkit-box-shadow: 5px 5px 35px -9px #5a5a5a;
+    -moz-box-shadow: 5px 5px 35px -9px #5a5a5a;
+    box-shadow: 5px 5px 35px -9px #5a5a5a; }
+    #track-info .thumbnail#track-image {
+      display: none; }
+    #track-info .thumbnail.upcoming {
+      width: 64px;
+      height: 64px; }
+  #track-info #upcoming-tracks {
+    margin-top: 20px; }
+  #track-info #track-stats {
+    display: inline-block;
+    padding-left: 30px;
+    font-size: 24px;
+    vertical-align: middle; }
+  #track-info .button {
+    display: none; }
+  #track-info #good-track {
+    background-color: #66B3BA; }
+  #track-info #bad-track {
+    background-color: #F0D2D1; }
 
 #main-input {
   position: relative;
   display: inline-block;
-  width: 50%;
+  width: 25%;
   text-align: center; }
   #main-input input {
     padding: 20px;
@@ -43,17 +73,54 @@ main {
     border-color: #ca615e;
     border-style: none solid solid none; }
   #main-input #go-time {
-    padding: 10px;
     color: #42CAFD;
     background-color: #fff;
-    border: 3px solid #42CAFD;
-    margin: 20px auto;
-    font-size: 18px;
-    width: 250px;
-    cursor: pointer; }
+    border: 3px solid #42CAFD; }
     #main-input #go-time:hover {
       background-color: #42CAFD;
       color: #fff; }
+  #main-input #go-random {
+    color: #edde49;
+    background-color: #fff;
+    border: 3px solid #edde49; }
+    #main-input #go-random:hover {
+      background-color: #edde49;
+      color: #fff; }
+
+.button {
+  padding: 10px;
+  margin: 20px auto;
+  font-size: 18px;
+  width: 250px;
+  cursor: pointer;
+  -webkit-box-shadow: 5px 5px 15px -9px #5a5a5a;
+  -moz-box-shadow: 5px 5px 15px -9px #5a5a5a;
+  box-shadow: 5px 5px 15px -9px #5a5a5a; }
 
 .message-zone {
-  text-align: left; }
+  text-align: left;
+  width: 50%;
+  font-size: 18px;
+  line-height: 1.6em;
+  margin-top: 60px; }
+  .message-zone p {
+    background-color: #fff;
+    padding: 5px;
+    -webkit-box-shadow: 5px 5px 5px -9px #5a5a5a;
+    -moz-box-shadow: 5px 5px 5px -9px #5a5a5a;
+    box-shadow: 5px 5px 5px -9px #5a5a5a; }
+
+.tk-thirty {
+  font-family: Garamond, Didot; }
+
+.tk-ninety {
+  font-family: Garamond, Helvetica; }
+
+.tk-eighty {
+  font-family: "Gill Sans", Calibri; }
+
+.tk-aught {
+  font-family: Helvetica, sans-serif; }
+
+.tk-ten {
+  font-family: Baskerville, "Times New Roman"; }

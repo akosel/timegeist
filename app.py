@@ -65,7 +65,7 @@ def get_year_songs(year):
         with open(path, 'r') as f:
             all_data = json.load(f)
             random.shuffle(all_data)
-            return json.dumps(all_data[:30])
+            return json.dumps(all_data[:10])
     else:
         return json.dumps({ 'status': 'empty' })
 

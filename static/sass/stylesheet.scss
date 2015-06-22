@@ -5,7 +5,7 @@ $olive: #8EB19D;
 $yellow: #F6EFA6;
 $red: #F0D2D1;
 
-$font-stack: "Gill Sans", Montserrat, sans-serif;
+$font-stack: "", Montserrat, sans-serif;
 
 body {
   font-family: $font-stack;
@@ -15,6 +15,7 @@ body {
   color: darken($red, 30%);
 }
 .logo {
+  margin-bottom: 60px;
   &::before {
     content: '';
     background: url(/static/img/timegeist.svg) no-repeat;
@@ -39,12 +40,51 @@ main {
 }
 #track-info {
   display: inline-block;
-  width: 50%;
+  vertical-align: top;
+  width: 75%;
+  height: 250px;
+  .thumbnail {
+    width: 150px;
+    height: 150px;
+    display: inline-block;
+    vertical-align: middle;
+    -webkit-box-shadow: 5px 5px 35px -9px rgba(90,90,90,1);
+    -moz-box-shadow: 5px 5px 35px -9px rgba(90,90,90,1);
+    box-shadow: 5px 5px 35px -9px rgba(90,90,90,1);
+    &#track-image {
+      display: none;
+    }
+
+    &.upcoming {
+      width: 64px;
+      height: 64px;
+    }
+  }
+  #upcoming-tracks {
+    margin-top: 20px;
+  }
+  #track-stats {
+    display: inline-block;
+    padding-left: 30px;
+    font-size: 24px;
+    vertical-align: middle;
+  }
+
+  .button {
+    display: none;
+  }
+  #good-track {
+    background-color: $green-blue;
+  }
+
+  #bad-track {
+    background-color: $red;
+  }
 }
 #main-input {
   position: relative;
   display: inline-block;
-  width: 50%;
+  width: 25%;
   text-align: center;
   input {
     padding: 20px;
@@ -55,20 +95,61 @@ main {
     border-style: none solid solid none;
   }
   #go-time {
-    padding: 10px;
     color: $light-blue;
     background-color: #fff;
     border: 3px solid $light-blue;
-    margin: 20px auto;
-    font-size: 18px;
-    width: 250px;
-    cursor: pointer;
     &:hover {
       background-color: $light-blue;
       color: #fff;
     }
   }
+  #go-random {
+    color: darken($yellow, 20%);
+    background-color: #fff;
+    border: 3px solid darken($yellow, 20%);
+    &:hover {
+      background-color: darken($yellow, 20%);
+      color: #fff;
+    }
+  }
+}
+.button {
+  padding: 10px;
+  margin: 20px auto;
+  font-size: 18px;
+  width: 250px;
+  cursor: pointer;
+  -webkit-box-shadow: 5px 5px 15px -9px rgba(90,90,90,1);
+  -moz-box-shadow: 5px 5px 15px -9px rgba(90,90,90,1);
+  box-shadow: 5px 5px 15px -9px rgba(90,90,90,1);
 }
 .message-zone {
   text-align: left;
+  width: 50%;
+  font-size: 18px;
+  line-height: 1.6em;
+  margin-top: 60px;
+  p {
+    background-color: #fff;
+    padding: 5px;
+    -webkit-box-shadow: 5px 5px 5px -9px rgba(90,90,90,1);
+    -moz-box-shadow: 5px 5px 5px -9px rgba(90,90,90,1);
+    box-shadow: 5px 5px 5px -9px rgba(90,90,90,1);
+  }
+}
+
+.tk-thirty {
+  font-family: Garamond, Didot;
+}
+.tk-ninety {
+  font-family: Garamond, Helvetica;
+}
+.tk-eighty {
+  font-family: "Gill Sans", Calibri;
+}
+.tk-aught {
+  font-family: Helvetica, sans-serif;
+}
+.tk-ten {
+  font-family: Baskerville, "Times New Roman";
 }
