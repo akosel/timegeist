@@ -47,7 +47,6 @@ def home():
 
 @app.route('/api/v1.0/events/<year>')
 def get_year_events(year):
-    # TODO break this up by year, or even better, use an actual database. Or redis!
     path = 'static/data/tidbits/tidbits_{0}.json'.format(year)
     if os.path.isfile(path):
         with open(path, 'r') as f:
@@ -58,7 +57,6 @@ def get_year_events(year):
 
 @app.route('/api/v1.0/songs/<year>')
 def get_year_songs(year):
-    # TODO get hits by year
     path = 'static/data/songs/charts_{0}.json'.format(year)
     if os.path.isfile(path):
         with open(path, 'r') as f:
