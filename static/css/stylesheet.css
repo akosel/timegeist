@@ -51,6 +51,7 @@ main {
   #track-info #track-stats {
     display: inline-block;
     padding-left: 30px;
+    width: 75%;
     font-size: 24px;
     vertical-align: middle; }
   #track-info .button {
