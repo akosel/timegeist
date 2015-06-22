@@ -8,6 +8,16 @@
   <body>
     <main>
     <h1 class="logo">TimeGeist</h1>
+      <section id="main-input">
+        <div class="group">
+          <input id="user-year" type="number" value=2001 min=1900 max=2015 required>
+          <span class="highlight"></span>
+          <span class="bar"></span>
+          <label>Year</label>
+        </div>
+        <div class="button" id="go-time"><span>I want this year!</span></div>
+        <div class="button" id="go-random"><span>Show a random year!</span></div>
+      </section>
       <section id="track-info">
         <h1>Select a year to begin! You can also just try a random year.</h1>
         <div class="thumbnail" id="track-image"></div>
@@ -22,10 +32,6 @@
           <div class="button" id="good-track">Good Track!</div>
           <div class="button" id="bad-track">So bad!</div>
         </div>
-      </section><section id="main-input">
-        <input id="user-year" type="number" value=2001 min=1900 max=2015/>
-        <div class="button" id="go-time"><span>I want this year!</span></div>
-        <div class="button" id="go-random"><span>I want a random year!</span></div>
       </section>
       <section class="message-zone"></section>
     </main>
