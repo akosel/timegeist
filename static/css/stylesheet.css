@@ -33,8 +33,8 @@ main {
   vertical-align: top;
   min-height: 250px; }
   #track-info .thumbnail {
-    width: 150px;
-    height: 150px;
+    width: 200px;
+    height: 200px;
     display: inline-block;
     vertical-align: middle;
     -webkit-box-shadow: 5px 5px 35px -9px #5a5a5a;
@@ -43,18 +43,22 @@ main {
     #track-info .thumbnail#track-image {
       display: none; }
     #track-info .thumbnail.upcoming {
-      width: 64px;
-      height: 64px; }
+      width: 128px;
+      height: 128px; }
   #track-info #upcoming-tracks {
     margin-top: 20px; }
-  #track-info #track-stats {
+    #track-info #upcoming-tracks .thumbnail {
+      margin-left: 5px; }
+  #track-info #track-view-container {
     display: inline-block;
-    width: 75%;
-    font-size: 24px;
-    vertical-align: middle; }
-    @media screen and (min-width: 630px) {
-      #track-info #track-stats {
-        padding-left: 30px; } }
+    width: 90%; }
+    #track-info #track-view-container #track-stats {
+      display: inline-block;
+      font-size: 24px;
+      vertical-align: middle; }
+      @media screen and (min-width: 630px) {
+        #track-info #track-view-container #track-stats {
+          padding-left: 30px; } }
   #track-info .button {
     display: none; }
   #track-info #good-track {
@@ -81,18 +85,21 @@ main {
 
 .button {
   display: inline-block;
-  padding: 20px;
+  padding: 17px;
   text-align: center;
+  font-family: Helvetica, sans-serif;
   font-size: 24px;
   width: 100%;
   margin-top: 5px;
+  vertical-align: top;
+  height: 69px;
   cursor: pointer;
   -webkit-box-shadow: 5px 5px 15px -9px #5a5a5a;
   -moz-box-shadow: 5px 5px 15px -9px #5a5a5a;
   box-shadow: 5px 5px 15px -9px #5a5a5a; }
   @media screen and (min-width: 630px) {
     .button {
-      margin: 20px auto;
+      margin: 0;
       width: 350px; } }
 
 .message-zone {
@@ -106,13 +113,15 @@ main {
   .message-zone p {
     background-color: #fff;
     padding: 5px;
+    font-family: Helvetica, sans-serif;
     -webkit-box-shadow: 5px 5px 5px -9px #5a5a5a;
     -moz-box-shadow: 5px 5px 5px -9px #5a5a5a;
     box-shadow: 5px 5px 5px -9px #5a5a5a; }
 
 /* GROUP */
 .group {
-  position: relative; }
+  position: relative;
+  display: inline-block; }
 
 input {
   font-size: 24px;
@@ -139,7 +148,7 @@ label {
   -webkit-transition: 0.2s ease all; }
 
 /* active state */
-input:focus ~ label, input:valid ~ label {
+input:focus ~ label, input:valid ~ label, input:invalid ~ label {
   top: -30px;
   font-size: 18px;
   color: #42CAFD; }

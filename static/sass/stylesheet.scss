@@ -47,8 +47,8 @@ main {
   vertical-align: top;
   min-height: 250px;
   .thumbnail {
-    width: 150px;
-    height: 150px;
+    width: 200px;
+    height: 200px;
     display: inline-block;
     vertical-align: middle;
     -webkit-box-shadow: 5px 5px 35px -9px rgba(90,90,90,1);
@@ -59,21 +59,27 @@ main {
     }
 
     &.upcoming {
-      width: 64px;
-      height: 64px;
+      width: 128px;
+      height: 128px;
     }
   }
   #upcoming-tracks {
     margin-top: 20px;
+    .thumbnail {
+      margin-left: 5px;
+    }
   }
-  #track-stats {
+  #track-view-container {
     display: inline-block;
-    width: 75%;
-    font-size: 24px;
-    vertical-align: middle;
+    width: 90%;
+    #track-stats {
+      display: inline-block;
+      font-size: 24px;
+      vertical-align: middle;
 
-    @media screen and (min-width: $break-large) {
-      padding-left: 30px;
+      @media screen and (min-width: $break-large) {
+        padding-left: 30px;
+      }
     }
   }
 
@@ -111,13 +117,16 @@ main {
 }
 .button {
   display: inline-block;
-  padding: 20px;
+  padding: 17px;
   text-align: center;
+  font-family: Helvetica, sans-serif;
   font-size: 24px;
   width: 100%;
   margin-top: 5px;
+  vertical-align: top;
+  height: 69px;
   @media screen and (min-width: $break-large) {
-    margin: 20px auto;
+    margin: 0;
     width: 350px;
   }
   cursor: pointer;
@@ -136,6 +145,7 @@ main {
   p {
     background-color: #fff;
     padding: 5px;
+    font-family: Helvetica, sans-serif;
     -webkit-box-shadow: 5px 5px 5px -9px rgba(90,90,90,1);
     -moz-box-shadow: 5px 5px 5px -9px rgba(90,90,90,1);
     box-shadow: 5px 5px 5px -9px rgba(90,90,90,1);
@@ -145,6 +155,7 @@ main {
 /* GROUP */
 .group { 
   position:relative; 
+  display:inline-block;
 }
 input {
   font-size:24px;
@@ -171,7 +182,7 @@ label {
 }
 
 /* active state */
-input:focus ~ label, input:valid ~ label {
+input:focus ~ label, input:valid ~ label, input:invalid ~ label {
   top:-30px;
   font-size:18px;
   color:$light-blue;
