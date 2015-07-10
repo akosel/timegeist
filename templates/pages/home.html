@@ -1,9 +1,12 @@
 <html !DOCTYPE>
 <head>
-
   <link rel="stylesheet" href="/static/css/stylesheet.css" type="text/css"/>
   <script src="//use.typekit.net/uiq7hdf.js"></script>
   <script>try{Typekit.load();}catch(e){}</script>
+  <script src="/static/js/crossfade_playlist.js"></script>
+  <script src="/static/js/buffer_loader.js"></script>
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/year.js"></script>
 </head>
 <body>
   <main>
@@ -28,11 +31,10 @@
           <p id="track-notes"></p>
         </div>
       </div>
-      <div id="upcoming-tracks">
-      </div>
+      <div id="upcoming-tracks"></div>
       <div class="track-buttons">
-        <div class="button" id="good-track">Good Track!</div>
-        <div class="button" id="bad-track">So bad!</div>
+        <div class="button" id="good-track"><span>Good Track!</span></div>
+        <div class="button" id="bad-track"><span>So bad!</span></div>
       </div>
     </section>
     <section class="message-zone"></section>
@@ -42,25 +44,38 @@
 
 window.onload = init;
 var context;
-var bufferLoader;
-var CrossfadePlaylist;
 var $go = document.querySelector('#go-time');
 var $input = document.querySelector('#user-year');
 var $messageZone = document.querySelector('.message-zone');
 var activeYear;
-var playlist = buildPlaylist();
+var playlist = Object.create(CrossfadePlaylist.prototype, {
+  FADE_TIME: {
+    value: 1
+  }, // Seconds
+  playing: {
+    value: false,
+    writable: true
+  },
+  playIdx: {
+    value: 0,
+    writable: true
+  },
+  trackList: {
+    value: [],
+    writable: true
+  }
+});
 
 function init() {
   // Fix up prefixing
   window.AudioContext = window.AudioContext || window.webkitAudioContext;
   context = new AudioContext();
   sendMessage('', 'h1');
-  getFontForYear($input.value);
 
   // XXX slight hack/necessity to allow sound to play in iOS
   document.querySelector('body').addEventListener('touchstart', playSound, false);
 }
-
+// XXX Truly temporary
 function playSound(buffer) {
   var source = context.createBufferSource(); // creates a sound source
   source.buffer = buffer;                    // tell the source which sound to play
@@ -69,10 +84,9 @@ function playSound(buffer) {
                                              // note: on older systems, may have to use deprecated noteOn(time);
 }
 
-
 var eventPublished = setInterval(function() {
   if ($input.value) {
-    getEvents(activeYear);
+    api.getEvents(activeYear);
   } else {
     // TODO error validation or just always have default value
     // $messageZone.textContent = 'You done messed up.';
@@ -101,14 +115,17 @@ document.onkeyup = function(e) {
     }
   }
 };
+
 $go.addEventListener('click', function(event) {
   if (activeYear !== $input.value) {
     fireItUp();
   }
 });
+
 function getRandomArbitrary(min, max) {
   return Math.round(Math.random() * (max - min) + min);
 }
+
 document.querySelector('#go-random').addEventListener('click', function(event) {
   $input.value = getRandomArbitrary(1899, 2014);
   if (activeYear !== $input.value) {
@@ -116,49 +133,23 @@ document.querySelector('#go-random').addEventListener('click', function(event) {
   }
 });
 
-
-// Year functions
-// TODO It would be better to store all year data in an object, rather than having these verbose function calls
-function getFontForYear(year) {
-  var $body = document.querySelector('main');
-  if (year < 1910) { $body.className = 'tk-ltc-broadway'; return; }
-  if (year < 1920) { $body.className = 'tk-ten'; return; }
-  if (year < 1930) { $body.className = 'tk-ltc-broadway'; return; }
-  if (year < 1940) { $body.className = 'tk-thirty'; return; }
-  if (year < 1950) { $body.className = 'tk-grafolita-script'; return; }
-  if (year < 1960) { $body.className = 'tk-clarendon-text-pro'; return; }
-  if (year < 1970) { $body.className = 'tk-futura-pt'; return; }
-  if (year < 1980) { $body.className = 'tk-cooper-black-std'; return; }
-  if (year < 1990) { $body.className = 'tk-eighty'; return; }
-  if (year < 2000) { $body.className = 'tk-ninety'; return; }
-  if (year < 2010) { $body.className = 'tk-aught'; return; }
-  if (year < 2020) { $body.className = 'tk-brandon-grotesque'; return; }
-
-  return;
-}
-
-function getMessageForYear(year) {
-  if (year < 1910) return 'Old timey times.';
-  if (year < 1920) return 'The War to End All Wars';
-  if (year < 1930) return 'Roaring 20s. Prohibition.';
-  if (year < 1940) return 'Depression. Roosevelt. Rise of fascism.';
-  if (year < 1950) return 'Wars. Big Wars.';
-  if (year < 1960) return 'McCarthyism and the beginning of the Cold War';
-  if (year < 1970) return 'Vietnam. Hippies. Mad Men.';
-  if (year < 1980) return 'Groovy.';
-  if (year < 1990) return 'Computers? Arena Rock. Back to the Future';
-  if (year < 2000) return 'Internet Age. Globalization.';
-  if (year < 2010) return 'The aughts. iPods. Iraq.';
-  if (year < 2020) return 'It\'s still happening.';
-
-  return 'YOLO';
-}
-
 var $trackInfo = document.querySelector('#track-info');
-$trackInfo.addEventListener('click', function(event) {
+var $goodTrack = document.querySelector('#good-track');
+var $badTrack  = document.querySelector('#bad-track');
+
+$trackInfo.querySelector('#track-image').addEventListener('click', function(event) {
   playlist.toggle();
-  console.log('track info toggled');
 });
+
+$goodTrack.addEventListener('click', function(event) {
+  // TODO I do not know
+});
+
+$badTrack.addEventListener('click', function(event) {
+  playlist.next();
+});
+
+var $body = document.querySelector('body');
 function fireItUp() {
   if (!$input.validity.valid) {
     console.log('The input is invalid.');
@@ -169,6 +160,9 @@ function fireItUp() {
   }
   activeYear = $input.value;
   getFontForYear(activeYear);
+  var colorPalette = getYearInfo(activeYear, 'colors');
+  $body.style.backgroundColor = colorPalette.background;
+
   clearTrackInfo();
   sendMessage('Welcome to ' + activeYear + ' - ' + getMessageForYear(activeYear), 'h1');
   searchTracks($input.value, function(response) {
@@ -232,10 +226,9 @@ var addBufferImages = function(tracks) {
   });
 };
 
-function searchTracks(query, callback) {
+function searchTracks(year, callback) {
   var trackList;
-  //get('https://api.spotify.com/v1/search?q=' + query + '&type=track', function(xhr) {
-  get('/api/v1.0/songs/' + query, function(xhr) {
+  api.getSongs(year, function(xhr) {
     trackList = JSON.parse(xhr.responseText);
     trackList = trackList.filter(function(track) {
       return track.preview_url;
@@ -243,207 +236,22 @@ function searchTracks(query, callback) {
 
     playlist.trackList = [];
     playlist.playIdx = 0;
-    bufferLoader = new BufferLoader(
-      context,
-      trackList,
-      playlist.loadTrack.bind(playlist)
-    );
+    var bufferLoader = Object.create(BufferLoader.prototype, {
+      context: {
+        value: context,
+        writable: true
+      },
+      trackList: {
+        value: trackList,
+        writable: true
+      },
+      onload: {
+        value: playlist.loadTrack.bind(playlist)
+      }
+    });
     bufferLoader.load();
   });
 };
-
-
-// Nice helpers from http://www.html5rocks.com/en/tutorials/webaudio/intro/
-function BufferLoader(context, trackList, callback) {
-  this.context = context;
-  this.onload = callback;
-  this.trackList = trackList;
-}
-BufferLoader.prototype.loadBuffer = function(trackObj, index) {
-  // Load buffer asynchronously
-  var request = new XMLHttpRequest();
-  request.open("GET", trackObj.preview_url, true);
-  request.responseType = "arraybuffer";
-  var loader = this;
-  request.onload = function() {
-    // Asynchronously decode the audio file data in request.response
-    loader.context.decodeAudioData(
-      request.response,
-      function(buffer) {
-        if (!buffer) {
-          alert('error decoding file data: ' + trackObj.preview_url);
-          return;
-        }
-        trackObj.buffer = buffer;
-        loader.onload(trackObj);
-        if (index === 0) {
-          if (playlist.playing) {
-            playlist.stop();
-          }
-          playlist.play();
-        }
-      },
-      function(error) {
-        console.log('decodeAudioData error', error);
-      }
-    );
-  }
-  request.onerror = function() {
-    alert('BufferLoader: XHR error');
-  }
-  request.send();
-}
-BufferLoader.prototype.load = function() {
-  this.urlList = this.trackList
-    .filter(function(track) {
-      return track.preview_url;
-    });
-  for (var i = 0; i < this.urlList.length; ++i)
-    this.loadBuffer(this.urlList[i], i);
-}
-
-
-function buildPlaylist() {
-  var CrossfadePlaylist = {
-    FADE_TIME: 1, // Seconds
-    playing: false,
-    playIdx: 0,
-    trackList: []
-  };
-
-  CrossfadePlaylist.play = function() {
-    var ctx = this;
-    playHelper();
-    ctx.playing = true;
-
-    function createSource(buffer) {
-      var source = context.createBufferSource();
-      var gainNode = context.createGain ? context.createGain() : context.createGainNode();
-      source.buffer = buffer;
-      // Connect source to gain.
-      source.connect(gainNode);
-      // Connect gain to destination.
-      gainNode.connect(context.destination);
-      return {
-        source: source,
-        gainNode: gainNode
-      };
-    }
-
-    function playHelper() {
-      ctx.playIdx = ctx.playIdx === ctx.trackList.length - 1 ? 0 : ctx.playIdx;
-      if(!ctx.trackList[ctx.playIdx].buffer) {
-        ctx.playIdx += 1;
-        arguments.callee();
-      }
-
-      updateTrackInfo(ctx.trackList[ctx.playIdx]);
-      addBufferImages(ctx.getNextTracks());
-      var bufferNow = ctx.trackList[ctx.playIdx].buffer;
-      var playNow = createSource(bufferNow);
-      var source = playNow.source;
-      ctx.source = source;
-      var gainNode = playNow.gainNode;
-      ctx.gainNode = gainNode;
-      var duration = bufferNow.duration;
-      var currTime = context.currentTime;
-      // Fade the playNow track in.
-      gainNode.gain.linearRampToValueAtTime(0, currTime);
-      gainNode.gain.linearRampToValueAtTime(1, currTime + ctx.FADE_TIME);
-      // Play the playNow track.
-      source.start ? source.start(0) : source.noteOn(0);
-      // At the end of the track, fade it out.
-      gainNode.gain.linearRampToValueAtTime(1, currTime + duration-ctx.FADE_TIME);
-      gainNode.gain.linearRampToValueAtTime(0, currTime + duration);
-      // Schedule a recursive track change with the tracks swapped.
-      var recurse = arguments.callee;
-      ctx.timer = setTimeout(function() {
-        ctx.playIdx += 1;
-        recurse();
-      }, (duration - ctx.FADE_TIME) * 1000);
-    }
-  };
-
-  CrossfadePlaylist.getNextTracks = function(num) {
-    num = num || 5;
-    var ub = this.trackList.length - 1;
-    num = num < ub ? num : ub;
-
-    if (this.playIdx + num - 1 < ub) {
-      return this.trackList.slice(this.playIdx + 1, this.playIdx + num);
-    } else {
-      var tailIndex = this.playIdx - ub;
-      var endSlice = this.trackList.slice(tailIndex);
-      var beginningSlice = this.trackList.slice(0, num + tailIndex);
-      return endSlice.concat(beginningSlice);
-    }
-  };
-
-  CrossfadePlaylist.loadTrack = function(trackObj) {
-    CrossfadePlaylist.trackList.push(trackObj);
-    addBufferImages(this.getNextTracks());
-  };
-
-  CrossfadePlaylist.stop = function() {
-    clearTimeout(this.timer);
-    this.playing = false;
-    this.source.stop ? this.source.stop(0) : this.source.noteOff(0);
-  };
-
-  CrossfadePlaylist.next = function() {
-    clearTimeout(this.timer);
-    this.source.stop ? this.source.stop(0) : this.source.noteOff(0);
-    this.playIdx += 1;
-    this.play();
-  };
-
-  CrossfadePlaylist.playTrack = function(playIdx) {
-    clearTimeout(this.timer);
-    this.source.stop ? this.source.stop(0) : this.source.noteOff(0);
-    this.playIdx = playIdx;
-    this.play();
-  };
-
-  CrossfadePlaylist.toggle = function() {
-    this.playing ? this.stop() : this.play();
-  };
-  return CrossfadePlaylist;
-};
-
-
-
-// Helpers
-function getEvents(year) {
-  if (!year) return;
-
-  var json, msgIdx;
-  get('/api/v1.0/events/' + year, function(xhr) {
-    json = JSON.parse(xhr.responseText);
-    if (json.status === 'empty') {
-      // TODO not sure what to do in this case
-    } else {
-      msgIdx = Math.round(Math.random() * (json.length - 1));
-      sendMessage(json[msgIdx][1]);
-    }
-  });
-}
-function getSongs(year) {
-  if (!year) return;
-
-  get('/api/v1.0/songs/' + year, function(xhr) {
-    console.log(xhr);
-  });
-}
-function get(url, callback) {
-  var xhr = new XMLHttpRequest();
-  xhr.open('GET', url);
-  xhr.onreadystatechange = function() {
-    if (xhr.readyState === 4 && xhr.status === 200 && callback) {
-      callback(xhr);
-    }
-  }
-  xhr.send();
-}
 
 </script>
 </html>

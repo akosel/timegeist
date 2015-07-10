@@ -8,8 +8,8 @@ body {
   font-family: "", Montserrat, sans-serif;
   padding: 0;
   margin: 0;
-  background-color: #F0D2D1;
-  color: #ca615e; }
+  background-color: #FFF;
+  color: #333333; }
 
 .logo {
   margin-bottom: 60px; }
@@ -41,7 +41,12 @@ main {
     -moz-box-shadow: 5px 5px 35px -9px #5a5a5a;
     box-shadow: 5px 5px 35px -9px #5a5a5a; }
     #track-info .thumbnail#track-image {
-      display: none; }
+      display: none;
+      cursor: pointer; }
+      #track-info .thumbnail#track-image:hover {
+        -webkit-box-shadow: 10px 10px 35px -9px #5a5a5a;
+        -moz-box-shadow: 10px 10px 35px -9px #5a5a5a;
+        box-shadow: 10px 10px 35px -9px #5a5a5a; }
     #track-info .thumbnail.upcoming {
       width: 128px;
       height: 128px; }
@@ -60,7 +65,7 @@ main {
         #track-info #track-view-container #track-stats {
           padding-left: 30px; } }
   #track-info .button {
-    display: none; }
+    margin-top: 20px; }
   #track-info #good-track {
     background-color: #66B3BA; }
   #track-info #bad-track {
@@ -69,11 +74,11 @@ main {
 #main-input {
   position: relative; }
   #main-input #go-time {
-    color: #42CAFD;
+    color: #666;
     background-color: #fff;
-    border: 3px solid #42CAFD; }
+    border: 3px solid #666; }
     #main-input #go-time:hover {
-      background-color: #42CAFD;
+      background-color: #666;
       color: #fff; }
   #main-input #go-random {
     color: #edde49;
@@ -93,6 +98,7 @@ main {
   margin-top: 5px;
   vertical-align: top;
   height: 69px;
+  border: 3px solid #666;
   cursor: pointer;
   -webkit-box-shadow: 5px 5px 15px -9px #5a5a5a;
   -moz-box-shadow: 5px 5px 15px -9px #5a5a5a;
@@ -101,6 +107,9 @@ main {
     .button {
       margin: 0;
       width: 350px; } }
+  .button:hover {
+    background-color: #666;
+    color: #fff; }
 
 .message-zone {
   text-align: left;
@@ -127,9 +136,13 @@ input {
   font-size: 24px;
   padding: 20px;
   display: block;
-  width: 350px;
+  width: 100%;
   border: none;
-  border-bottom: 1px solid #42CAFD; }
+  border-bottom: 1px solid #666; }
+  @media screen and (min-width: 630px) {
+    input {
+      margin: 0;
+      width: 350px; } }
 
 input:focus {
   outline: none; }
@@ -151,7 +164,7 @@ label {
 input:focus ~ label, input:valid ~ label, input:invalid ~ label {
   top: -30px;
   font-size: 18px;
-  color: #42CAFD; }
+  color: #666; }
 
 /* BOTTOM BARS ================================= */
 .bar {
@@ -165,7 +178,7 @@ input:focus ~ label, input:valid ~ label, input:invalid ~ label {
   width: 0;
   bottom: 1px;
   position: absolute;
-  background: #42CAFD;
+  background: #666;
   transition: 0.2s ease all;
   -moz-transition: 0.2s ease all;
   -webkit-transition: 0.2s ease all; }
