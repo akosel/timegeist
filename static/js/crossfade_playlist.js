@@ -21,7 +21,6 @@ CrossfadePlaylist.prototype.play = function() {
 
   function playHelper() {
     ctx.playIdx = ctx.playIdx === ctx.trackList.length - 1 ? 0 : ctx.playIdx;
-    console.log(JSON.stringify(ctx.trackList), ctx.playIdx); 
     if(!ctx.trackList[ctx.playIdx]) {
       arguments.callee();
     }
@@ -87,7 +86,6 @@ CrossfadePlaylist.prototype.next = function() {
   clearTimeout(this.timer);
   this.source.stop ? this.source.stop(0) : this.source.noteOff(0);
   this.playIdx += 1;
-  console.log(this);
   this.play();
 };
 

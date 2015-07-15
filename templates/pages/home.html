@@ -206,7 +206,6 @@ function updateTrackInfo(track) {
   $trackInfo.style.background = 'none';
   if (track && track.album && track.album.images && track.album.images.length > 1) {
     var albumImgUrl = track.album.images[1].url;
-    console.log(track);
     document.querySelector('#track-image').style.background = 'url(' + albumImgUrl + ') no-repeat';
     document.querySelector('#track-image').style.backgroundSize = 'contain';
     document.querySelector('#track-image').style.display = 'inline-block';

@@ -13,9 +13,7 @@ BufferLoader.prototype.loadBuffers = function(trackList, firstRun) {
   }
   // Load buffer asynchronously
   var request = new XMLHttpRequest();
-  console.log(trackList);
   var trackObj = trackList.pop();
-  console.log(trackObj);
   request.open("GET", trackObj.preview_url, true);
   request.responseType = "arraybuffer";
   var loader = this;
@@ -29,7 +27,6 @@ BufferLoader.prototype.loadBuffers = function(trackList, firstRun) {
           return;
         }
         trackObj.buffer = buffer;
-        console.log(trackObj.year, activeYear);
         if (trackObj.year === activeYear) {
           playlist.loadTrack(trackObj);
         }
@@ -39,8 +36,6 @@ BufferLoader.prototype.loadBuffers = function(trackList, firstRun) {
           }
           playlist.play();
           firstRun = false;
-        } else if (!loader.trackList.length) {
-          pub('bufferLoader.doneLoading', {});
         }
         loader.loadBuffers(trackList, firstRun);
       },
@@ -56,7 +51,6 @@ BufferLoader.prototype.loadBuffers = function(trackList, firstRun) {
   request.send();
 };
 BufferLoader.prototype.load = function() {
-  sub('bufferLoader.doneLoading', function(data) { console.log('done', data); });
   this.urlList = this.trackList
     .filter(function(track) {
       return track.preview_url;
