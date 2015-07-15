@@ -70,6 +70,9 @@ main {
       height: 128px;
     }
   }
+  #track-upcoming-container {
+    height: 350px;
+  }
   #upcoming-tracks {
     margin-top: 20px;
     .thumbnail {
@@ -78,7 +81,7 @@ main {
   }
   #track-view-container {
     display: inline-block;
-    width: 90%;
+    width: 100%;
     #track-stats {
       display: inline-block;
       font-size: 24px;
@@ -90,15 +93,17 @@ main {
     }
   }
 
-  .button {
+  .track-buttons {
     margin-top: 20px;
+    .button {
+      margin-top: 20px;
+    }
   }
   #good-track {
-    background-color: $green-blue;
+    display: none;
   }
 
   #bad-track {
-    background-color: $red;
   }
 }
 #main-input {

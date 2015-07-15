@@ -1,6 +1,7 @@
 // pub/sub
 var messageBus = {};
 var pub = function(topic, data) {
+  if (!messageBus[topic]) return;
   messageBus[topic].forEach(function(callback) {
     callback(data);
   });

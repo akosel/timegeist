@@ -4,9 +4,18 @@ function BufferLoader(context, trackList, callback) {
   this.onload = callback;
   this.trackList = trackList;
 }
-BufferLoader.prototype.loadBuffer = function(trackObj, index) {
+BufferLoader.prototype.loadBuffers = function(trackList, firstRun) {
+  sub('buffer.clearList', function(data) {
+    trackList = [];
+  });
+  if (!trackList || !trackList.length) {
+    return;
+  }
   // Load buffer asynchronously
   var request = new XMLHttpRequest();
+  console.log(trackList);
+  var trackObj = trackList.pop();
+  console.log(trackObj);
   request.open("GET", trackObj.preview_url, true);
   request.responseType = "arraybuffer";
   var loader = this;
@@ -20,19 +29,24 @@ BufferLoader.prototype.loadBuffer = function(trackObj, index) {
           return;
         }
         trackObj.buffer = buffer;
-        if (index === 0) {
+        console.log(trackObj.year, activeYear);
+        if (trackObj.year === activeYear) {
+          playlist.loadTrack(trackObj);
+        }
+        if (firstRun) {
           if (playlist.playing) {
             playlist.stop();
           }
           playlist.play();
-        } else if (index === loader.trackList.length - 1) {
-          console.log('done loading')
-          playlist.loading = false;
+          firstRun = false;
+        } else if (!loader.trackList.length) {
+          pub('bufferLoader.doneLoading', {});
         }
-        playlist.loadTrack(trackObj);
+        loader.loadBuffers(trackList, firstRun);
       },
       function(error) {
         console.log('decodeAudioData error', error);
+        loader.loadBuffers(trackList, firstRun);
       }
     );
   }
@@ -42,11 +56,12 @@ BufferLoader.prototype.loadBuffer = function(trackObj, index) {
   request.send();
 };
 BufferLoader.prototype.load = function() {
-  playlist.loading = true;
+  sub('bufferLoader.doneLoading', function(data) { console.log('done', data); });
   this.urlList = this.trackList
     .filter(function(track) {
       return track.preview_url;
     });
-  for (var i = 0; i < this.urlList.length; ++i)
-    this.loadBuffer(this.urlList[i], i);
+
+  pub('buffer.clearList', {});
+  this.loadBuffers(this.urlList, true);
 };

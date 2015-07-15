@@ -7,6 +7,8 @@
   <script src="/static/js/buffer_loader.js"></script>
   <script src="/static/js/api.js"></script>
   <script src="/static/js/year.js"></script>
+  <script src="/static/js/pubsub.js"></script>
+
 </head>
 <body>
   <main>
@@ -23,18 +25,20 @@
     </section>
     <section id="track-info">
       <h1>Select a year between 1900 and 2015 to begin! You can also just try a random year.</h1>
-      <div id="track-view-container">
-        <div class="thumbnail" id="track-image"></div>
-        <div id="track-stats">
-          <p id="track-name"></p>
-          <p id="track-artist"></p>
-          <p id="track-notes"></p>
+      <div id="track-upcoming-container">
+        <div id="track-view-container">
+          <div class="thumbnail" id="track-image"></div>
+          <div id="track-stats">
+            <p id="track-name"></p>
+            <p id="track-artist"></p>
+            <p id="track-notes"></p>
+          </div>
         </div>
+        <div id="upcoming-tracks"></div>
       </div>
-      <div id="upcoming-tracks"></div>
       <div class="track-buttons">
         <div class="button" id="good-track"><span>Good Track!</span></div>
-        <div class="button" id="bad-track"><span>So bad!</span></div>
+        <div class="button" id="bad-track"><span>Skip</span></div>
       </div>
     </section>
     <section class="message-zone"></section>
@@ -48,6 +52,7 @@ var $go = document.querySelector('#go-time');
 var $input = document.querySelector('#user-year');
 var $messageZone = document.querySelector('.message-zone');
 var activeYear;
+var bufferLoader;
 var playlist = Object.create(CrossfadePlaylist.prototype, {
   FADE_TIME: {
     value: 1
@@ -70,6 +75,19 @@ function init() {
   // Fix up prefixing
   window.AudioContext = window.AudioContext || window.webkitAudioContext;
   context = new AudioContext();
+  bufferLoader = Object.create(BufferLoader.prototype, {
+    context: {
+      value: context,
+      writable: true
+    },
+    trackList: {
+      value: [],
+      writable: true
+    },
+    onload: {
+      value: playlist.loadTrack.bind(playlist)
+    }
+  });
   sendMessage('', 'h1');
 
   // XXX slight hack/necessity to allow sound to play in iOS
@@ -160,8 +178,8 @@ function fireItUp() {
   }
   activeYear = $input.value;
   getFontForYear(activeYear);
-  var colorPalette = getYearInfo(activeYear, 'colors');
-  $body.style.backgroundColor = colorPalette.background;
+  //var colorPalette = getYearInfo(activeYear, 'colors');
+  //$body.style.backgroundColor = colorPalette.background;
 
   clearTrackInfo();
   sendMessage('Welcome to ' + activeYear + ' - ' + getMessageForYear(activeYear), 'h1');
@@ -234,21 +252,9 @@ function searchTracks(year, callback) {
       return track.preview_url;
     });
 
-    playlist.trackList = [];
     playlist.playIdx = 0;
-    var bufferLoader = Object.create(BufferLoader.prototype, {
-      context: {
-        value: context,
-        writable: true
-      },
-      trackList: {
-        value: trackList,
-        writable: true
-      },
-      onload: {
-        value: playlist.loadTrack.bind(playlist)
-      }
-    });
+    playlist.trackList = [];
+    bufferLoader.trackList = trackList;
     bufferLoader.load();
   });
 };

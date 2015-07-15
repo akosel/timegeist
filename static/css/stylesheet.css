@@ -50,13 +50,15 @@ main {
     #track-info .thumbnail.upcoming {
       width: 128px;
       height: 128px; }
+  #track-info #track-upcoming-container {
+    height: 350px; }
   #track-info #upcoming-tracks {
     margin-top: 20px; }
     #track-info #upcoming-tracks .thumbnail {
       margin-left: 5px; }
   #track-info #track-view-container {
     display: inline-block;
-    width: 90%; }
+    width: 100%; }
     #track-info #track-view-container #track-stats {
       display: inline-block;
       font-size: 24px;
@@ -64,12 +66,12 @@ main {
       @media screen and (min-width: 630px) {
         #track-info #track-view-container #track-stats {
           padding-left: 30px; } }
-  #track-info .button {
+  #track-info .track-buttons {
     margin-top: 20px; }
+    #track-info .track-buttons .button {
+      margin-top: 20px; }
   #track-info #good-track {
-    background-color: #66B3BA; }
-  #track-info #bad-track {
-    background-color: #F0D2D1; }
+    display: none; }
 
 #main-input {
   position: relative; }
