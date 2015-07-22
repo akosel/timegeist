@@ -22,7 +22,7 @@ body {
 
 main {
   position: relative;
-  overflow: auto;
+  overflow: visible;
   margin: auto; }
   @media screen and (min-width: 630px) {
     main {
@@ -31,7 +31,13 @@ main {
 #track-info {
   display: block;
   vertical-align: top;
-  min-height: 250px; }
+  min-height: 250px;
+  width: 100%;
+  display: inline-block;
+  box-sizing: border-box; }
+  @media screen and (min-width: 630px) {
+    #track-info {
+      width: 50%; } }
   #track-info .thumbnail {
     width: 200px;
     height: 200px;
@@ -51,7 +57,7 @@ main {
       width: 128px;
       height: 128px; }
   #track-info #track-upcoming-container {
-    height: 350px; }
+    min-height: 350px; }
   #track-info #upcoming-tracks {
     margin-top: 20px; }
     #track-info #upcoming-tracks .thumbnail {
@@ -62,7 +68,8 @@ main {
     #track-info #track-view-container #track-stats {
       display: inline-block;
       font-size: 24px;
-      vertical-align: middle; }
+      vertical-align: middle;
+      max-width: 300px; }
       @media screen and (min-width: 630px) {
         #track-info #track-view-container #track-stats {
           padding-left: 30px; } }
@@ -117,7 +124,8 @@ main {
   text-align: left;
   font-size: 18px;
   line-height: 1.6em;
-  margin-top: 60px; }
+  display: inline-block;
+  box-sizing: border-box; }
   @media screen and (min-width: 630px) {
     .message-zone {
       width: 50%; } }
