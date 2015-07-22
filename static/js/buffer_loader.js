@@ -1,9 +1,6 @@
 // Nice helpers from http://www.html5rocks.com/en/tutorials/webaudio/intro/
-function BufferLoader(context, trackList, callback) {
-  this.context = context;
-  this.onload = callback;
-  this.trackList = trackList;
-}
+function BufferLoader() {}
+BufferLoader.prototype.constructor = BufferLoader;
 BufferLoader.prototype.loadBuffers = function(trackList, firstRun) {
   sub('buffer.clearList', function(data) {
     trackList = [];
@@ -27,15 +24,10 @@ BufferLoader.prototype.loadBuffers = function(trackList, firstRun) {
           return;
         }
         trackObj.buffer = buffer;
-        if (trackObj.year === activeYear) {
-          playlist.loadTrack(trackObj);
-        }
-        if (firstRun) {
-          if (playlist.playing) {
-            playlist.stop();
-          }
-          playlist.play();
-          firstRun = false;
+        console.log(trackObj.year, loader.activeYear);
+        if (trackObj.year === loader.activeYear) {
+          console.log('loading track', trackObj);
+          loader.onload(trackObj);
         }
         loader.loadBuffers(trackList, firstRun);
       },
@@ -51,6 +43,7 @@ BufferLoader.prototype.loadBuffers = function(trackList, firstRun) {
   request.send();
 };
 BufferLoader.prototype.load = function() {
+  var self = this;
   this.urlList = this.trackList
     .filter(function(track) {
       return track.preview_url;

@@ -1,5 +1,6 @@
 <html !DOCTYPE>
 <head>
+  <link rel="icon" type="image/svg+xml" href="/static/img/timegeist.ico">
   <link rel="stylesheet" href="/static/css/stylesheet.css" type="text/css"/>
   <script src="//use.typekit.net/uiq7hdf.js"></script>
   <script>try{Typekit.load();}catch(e){}</script>
@@ -8,6 +9,7 @@
   <script src="/static/js/api.js"></script>
   <script src="/static/js/year.js"></script>
   <script src="/static/js/pubsub.js"></script>
+  <script src="/static/lib/react.js"></script>
 
 </head>
 <body>
@@ -47,34 +49,69 @@
 <script>
 
 window.onload = init;
-var context;
-var $go = document.querySelector('#go-time');
-var $input = document.querySelector('#user-year');
-var $messageZone = document.querySelector('.message-zone');
-var activeYear;
-var bufferLoader;
-var playlist = Object.create(CrossfadePlaylist.prototype, {
-  FADE_TIME: {
-    value: 1
-  }, // Seconds
-  playing: {
-    value: false,
-    writable: true
-  },
-  playIdx: {
-    value: 0,
-    writable: true
-  },
-  trackList: {
-    value: [],
-    writable: true
-  }
-});
 
 function init() {
+  var MessageZone = React.createClass({displayName: 'MessageZone',
+    render: function() {
+      return (
+        React.createElement('div', {className: 'message-zone'},
+          "Test"
+        )
+      );
+    }
+  });
+
+  var Message = React.createClass({
+    render: function() {
+      return (
+        React.createElement('p', {className: 'message-zone'},
+          "Test"
+        )
+      );
+    }
+  });
+  React.render(
+    React.createElement(MessageZone, null),
+    document.querySelector('.message-zone')
+  );
+
+  var $body = document.querySelector('body');
+  var $go = document.querySelector('#go-time');
+  var $input = document.querySelector('#user-year');
+  var $messageZone = document.querySelector('.message-zone');
+  var $trackInfo = document.querySelector('#track-info');
+  var $goodTrack = document.querySelector('#good-track');
+  var $badTrack  = document.querySelector('#bad-track');
+
+  window.bufferLoader, window.playlist;
+  var activeYear;
+
   // Fix up prefixing
   window.AudioContext = window.AudioContext || window.webkitAudioContext;
-  context = new AudioContext();
+  var context = new AudioContext();
+
+  playlist = Object.create(CrossfadePlaylist.prototype, {
+    FADE_TIME: {
+      value: 1
+    }, // Seconds
+    playing: {
+      value: undefined,
+      writable: true
+    },
+    playIdx: {
+      value: 0,
+      writable: true
+    },
+    trackList: {
+      value: [],
+      writable: true
+    },
+    context: {
+      value: context,
+      writable: true
+    }
+  });
+
   bufferLoader = Object.create(BufferLoader.prototype, {
     context: {
       value: context,
@@ -86,177 +123,193 @@ function init() {
     },
     onload: {
       value: playlist.loadTrack.bind(playlist)
+    },
+    activeYear: {
+      value: activeYear,
+      writable: true
     }
   });
-  sendMessage('', 'h1');
+  sub('yearChange', function(data) {
+    playlist.switching = true;
+    bufferLoader.activeYear = data.year;
+  });
+  pub('sendMessage', { message: '', elType: 'h1' });
 
   // XXX slight hack/necessity to allow sound to play in iOS
   document.querySelector('body').addEventListener('touchstart', playSound, false);
-}
-// XXX Truly temporary
-function playSound(buffer) {
-  var source = context.createBufferSource(); // creates a sound source
-  source.buffer = buffer;                    // tell the source which sound to play
-  source.connect(context.destination);       // connect the source to the context's destination (the speakers)
-  source.start(0);                           // play the source now
-                                             // note: on older systems, may have to use deprecated noteOn(time);
-}
 
-var eventPublished = setInterval(function() {
-  if ($input.value) {
-    api.getEvents(activeYear);
-  } else {
-    // TODO error validation or just always have default value
-    // $messageZone.textContent = 'You done messed up.';
+  // XXX Truly temporary
+  function playSound(buffer) {
+    var source = context.createBufferSource(); // creates a sound source
+    source.buffer = buffer;                    // tell the source which sound to play
+    source.connect(context.destination);       // connect the source to the context's destination (the speakers)
+    source.start(0);                           // play the source now
+                                               // note: on older systems, may have to use deprecated noteOn(time);
   }
-}, 7000);
 
-// TODO add this to the interface. It's kind of a cool feature
-var coastMode = false;
-var coasting = setInterval(function() {
-  if (coastMode) {
-    $input.value = parseInt(activeYear) < 2014 ? parseInt(activeYear) + 1 : 1900;
-    fireItUp();
-  } else {
-    clearInterval(coasting);
-  }
-}, 25000);
+  var eventPublished = setInterval(function() {
+    if ($input.value) {
+      api.getEvents(activeYear);
+    } else {
+      // TODO error validation or just always have default value
+      // $messageZone.textContent = 'You done messed up.';
+    }
+  }, 7000);
 
-document.onkeyup = function(e) {
-  if (e.keyCode === 13) {
+  // TODO add this to the interface. It's kind of a cool feature
+  var coastMode = false;
+  var coasting = setInterval(function() {
+    if (coastMode) {
+      $input.value = parseInt(activeYear) < 2014 ? parseInt(activeYear) + 1 : 1900;
+      fireItUp();
+    } else {
+      clearInterval(coasting);
+    }
+  }, 25000);
+
+  document.onkeyup = function(e) {
+    if (e.keyCode === 13) {
+      if (activeYear !== $input.value) {
+        fireItUp();
+      }
+    } else if (e.keyCode === 32) {
+      if (activeYear !== $input.value) {
+        playlist.toggle();
+      }
+    }
+  };
+
+  $go.addEventListener('click', function(event) {
     if (activeYear !== $input.value) {
       fireItUp();
     }
-  } else if (e.keyCode === 32) {
+  });
+
+  function getRandomArbitrary(min, max) {
+    return Math.round(Math.random() * (max - min) + min);
+  }
+
+  document.querySelector('#go-random').addEventListener('click', function(event) {
+    $input.value = getRandomArbitrary(1899, 2014);
     if (activeYear !== $input.value) {
-      playlist.toggle();
+      fireItUp();
     }
-  }
-};
-
-$go.addEventListener('click', function(event) {
-  if (activeYear !== $input.value) {
-    fireItUp();
-  }
-});
-
-function getRandomArbitrary(min, max) {
-  return Math.round(Math.random() * (max - min) + min);
-}
-
-document.querySelector('#go-random').addEventListener('click', function(event) {
-  $input.value = getRandomArbitrary(1899, 2014);
-  if (activeYear !== $input.value) {
-    fireItUp();
-  }
-});
-
-var $trackInfo = document.querySelector('#track-info');
-var $goodTrack = document.querySelector('#good-track');
-var $badTrack  = document.querySelector('#bad-track');
-
-$trackInfo.querySelector('#track-image').addEventListener('click', function(event) {
-  playlist.toggle();
-});
-
-$goodTrack.addEventListener('click', function(event) {
-  // TODO I do not know
-});
-
-$badTrack.addEventListener('click', function(event) {
-  playlist.next();
-});
-
-var $body = document.querySelector('body');
-function fireItUp() {
-  if (!$input.validity.valid) {
-    console.log('The input is invalid.');
-    return false;
-  }
-  while ($messageZone.firstChild) {
-    $messageZone.removeChild($messageZone.firstChild);
-  }
-  activeYear = $input.value;
-  getFontForYear(activeYear);
-  //var colorPalette = getYearInfo(activeYear, 'colors');
-  //$body.style.backgroundColor = colorPalette.background;
-
-  clearTrackInfo();
-  sendMessage('Welcome to ' + activeYear + ' - ' + getMessageForYear(activeYear), 'h1');
-  searchTracks($input.value, function(response) {
-    console.log($input.value, response);
   });
-}
 
-function sendMessage(content, elType) {
-  elType = elType || 'p';
-  var $p = document.createElement(elType);
-  $p.textContent = content;
-  $firstP = $messageZone.querySelector(elType);
-  $messageZone.insertBefore($p, $firstP);
-}
-
-function updateTrackInfo(track) {
-  var $name = document.querySelector('#track-name');
-  var $artist = document.querySelector('#track-artist');
-  //var $notes = document.querySelector('#track-notes');
-  $name.textContent = track.name;
-  $artist.textContent = track.artist;
-  //$notes.textContent = track.notes;
-  $trackInfo.style.background = 'none';
-  if (track && track.album && track.album.images && track.album.images.length > 1) {
-    var albumImgUrl = track.album.images[1].url;
-    document.querySelector('#track-image').style.background = 'url(' + albumImgUrl + ') no-repeat';
-    document.querySelector('#track-image').style.backgroundSize = 'contain';
-    document.querySelector('#track-image').style.display = 'inline-block';
-  }
-}
-
-function clearTrackInfo() {
-  [].forEach.call($trackInfo.querySelectorAll('p, h1'), function($p) {
-    $p.textContent = '';
+  $trackInfo.querySelector('#track-image').addEventListener('click', function(event) {
+    playlist.toggle();
   });
-  [].forEach.call($trackInfo.querySelectorAll('.thumbnail'), function($thumbnail) {
-    $thumbnail.style.background = 'none';
-    $thumbnail.style.display = 'none';
-  });
-  $trackInfo.querySelector('#track-image').style.display = 'none';
-  $trackInfo.style.background = 'url(/static/img/clock.svg) no-repeat scroll center center';
-  $trackInfo.style.backgroundSize = 'contain';
-}
 
-var addBufferImages = function(tracks) {
-  var $upcoming = document.querySelector('#upcoming-tracks');
-  while($upcoming.firstChild) {
-    $upcoming.removeChild($upcoming.firstChild);
+  $goodTrack.addEventListener('click', function(event) {
+    // TODO I do not know
+  });
+
+  $badTrack.addEventListener('click', function(event) {
+    playlist.next();
+  });
+
+  function fireItUp() {
+    if (!$input.validity.valid) {
+      console.log('The input is invalid.');
+      return false;
+    }
+    while ($messageZone.firstChild) {
+      $messageZone.removeChild($messageZone.firstChild);
+    }
+    activeYear = $input.value;
+    pub('yearChange', { year: activeYear });
+    getFontForYear(activeYear);
+    //var colorPalette = getYearInfo(activeYear, 'colors');
+    //$body.style.backgroundColor = colorPalette.background;
+
+    pub('clearTrackInfo');
+    pub('sendMessage', { message: 'Welcome to ' + activeYear + ' - ' + getMessageForYear(activeYear), elType: 'h1' });
+    searchTracks($input.value);
   }
-  var $div;
-  tracks.forEach(function(track) {
+
+  sub('sendMessage', function(args) {
+    var elType = args.elType || 'p';
+    var $p = document.createElement(elType);
+    $p.textContent = args.content;
+    $firstP = $messageZone.querySelector(elType);
+    $messageZone.insertBefore($p, $firstP);
+  });
+
+  sub('updateTrackInfo', function(args) {
+    var track = args.nowPlaying;
+    var $name = document.querySelector('#track-name');
+    var $artist = document.querySelector('#track-artist');
+    //var $notes = document.querySelector('#track-notes');
+    $name.textContent = track.name;
+    $artist.textContent = track.artist;
+    //$notes.textContent = track.notes;
+    $trackInfo.style.background = 'none';
     if (track && track.album && track.album.images && track.album.images.length > 1) {
-      $div = document.createElement('div');
       var albumImgUrl = track.album.images[1].url;
-      $div.style.background = 'url(' + albumImgUrl + ') no-repeat';
-      $div.style.backgroundSize = 'contain';
-      $div.className = 'thumbnail upcoming';
-      $upcoming.appendChild($div);
+      document.querySelector('#track-image').style.background = 'url(' + albumImgUrl + ') no-repeat';
+      document.querySelector('#track-image').style.backgroundSize = 'contain';
+      document.querySelector('#track-image').style.display = 'inline-block';
     }
   });
-};
 
-function searchTracks(year, callback) {
-  var trackList;
-  api.getSongs(year, function(xhr) {
-    trackList = JSON.parse(xhr.responseText);
-    trackList = trackList.filter(function(track) {
-      return track.preview_url;
+  sub('clearTrackInfo', function() {
+    [].forEach.call($trackInfo.querySelectorAll('p, h1'), function($p) {
+      $p.textContent = '';
     });
+    [].forEach.call($trackInfo.querySelectorAll('.thumbnail'), function($thumbnail) {
+      $thumbnail.style.background = 'none';
+      $thumbnail.style.display = 'none';
+    });
+    $trackInfo.querySelector('#track-image').style.display = 'none';
 
-    playlist.playIdx = 0;
-    playlist.trackList = [];
-    bufferLoader.trackList = trackList;
-    bufferLoader.load();
+    pub('loadingIndicator', { loading: true });
   });
-};
 
+  sub('loadingIndicator', function(data) {
+    var loading = data.loading || false; 
+
+    if (loading) {
+      $trackInfo.style.background = 'url(/static/img/clock.svg) no-repeat scroll center center';
+      $trackInfo.style.backgroundSize = 'contain';
+    } else {
+      $trackInfo.style.background = 'none';
+    }
+  });
+
+  sub('addBufferImages', function(args) {
+    var tracks = args.tracks;
+    var $upcoming = document.querySelector('#upcoming-tracks');
+    while($upcoming.firstChild) {
+      $upcoming.removeChild($upcoming.firstChild);
+    }
+    var $div;
+    tracks.forEach(function(track) {
+      if (track && track.album && track.album.images && track.album.images.length > 1) {
+        $div = document.createElement('div');
+        var albumImgUrl = track.album.images[1].url;
+        $div.style.background = 'url(' + albumImgUrl + ') no-repeat';
+        $div.style.backgroundSize = 'contain';
+        $div.className = 'thumbnail upcoming';
+        $upcoming.appendChild($div);
+        pub('loadingIndicator', { loading: false });
+      }
+    });
+  });
+
+  function searchTracks(year, callback) {
+    var trackList;
+    api.getSongs(year, function(xhr) {
+      trackList = JSON.parse(xhr.responseText);
+      trackList = trackList.filter(function(track) {
+        return track.preview_url;
+      });
+
+      playlist.trackList = [];
+      bufferLoader.trackList = trackList;
+      bufferLoader.load();
+    });
+  };
+
+}
 </script>
 </html>

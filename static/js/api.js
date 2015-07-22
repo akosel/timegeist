@@ -10,7 +10,7 @@ api.getEvents = function(year) {
       // TODO not sure what to do in this case
     } else {
       msgIdx = Math.round(Math.random() * (json.length - 1));
-      sendMessage(json[msgIdx][1]);
+      pub('sendMessage', { content: json[msgIdx][1] });
     }
   });
 }

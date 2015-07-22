@@ -2,6 +2,7 @@ var CrossfadePlaylist = function() {};
 
 CrossfadePlaylist.prototype.play = function() {
   var ctx = this;
+  var context = this.context;
   playHelper();
   ctx.playing = true;
 
@@ -29,8 +30,8 @@ CrossfadePlaylist.prototype.play = function() {
       arguments.callee();
     }
 
-    updateTrackInfo(ctx.trackList[ctx.playIdx]);
-    addBufferImages(ctx.getNextTracks());
+    pub('updateTrackInfo', { nowPlaying: ctx.trackList[ctx.playIdx] });
+    pub('addBufferImages', { tracks: ctx.getNextTracks() });
     var bufferNow = ctx.trackList[ctx.playIdx].buffer;
     var playNow = createSource(bufferNow);
     var source = playNow.source;
@@ -73,7 +74,17 @@ CrossfadePlaylist.prototype.getNextTracks = function(num) {
 
 CrossfadePlaylist.prototype.loadTrack = function(trackObj) {
   this.trackList.push(trackObj);
-  addBufferImages(this.getNextTracks());
+  if (typeof this.playing === 'undefined') {
+    this.switching = false;
+    this.play(); 
+  } else if (this.switching) {
+    this.switching = false;
+    playlist.playIdx = 0;
+    clearTimeout(this.timer);
+    this.source.stop ? this.source.stop(0) : this.source.noteOff(0);
+    this.play();
+  }
+  pub('addBufferImages', { tracks: this.getNextTracks() });
 };
 
 CrossfadePlaylist.prototype.stop = function() {
