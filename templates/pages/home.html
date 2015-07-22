@@ -48,6 +48,8 @@
   </main>
 </body>
 <script type="text/jsx">
+  var ReactCSSTransitionGroup = React.addons.CSSTransitionGroup;
+
   var MessageBox = React.createClass({
     loadMessagesFromServer: function(year) {
       api.getEvents(year, function(events) {
@@ -93,14 +95,16 @@
   });
   var MessageList = React.createClass({
     render: function() {
-      var messageNodes = this.props.slice.map(function(message) {
+      var messageNodes = this.props.slice.map(function(message, idx) {
         return (
-          <Message message={message[1]}></Message>
+          <Message key={message[1]} message={message[1]}></Message>
         );
       });
       return (
           <div className='message-list'>
-            {messageNodes}
+            <ReactCSSTransitionGroup transitionName="fade">
+              {messageNodes}
+            </ReactCSSTransitionGroup>
           </div>
       );
     }
