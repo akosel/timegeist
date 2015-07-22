@@ -2,7 +2,7 @@
 function BufferLoader() {}
 BufferLoader.prototype.constructor = BufferLoader;
 BufferLoader.prototype.loadBuffers = function(trackList, firstRun) {
-  sub('buffer.clearList', function(data) {
+  events.sub('buffer.clearList', function(data) {
     trackList = [];
   });
   if (!trackList || !trackList.length) {
@@ -24,9 +24,7 @@ BufferLoader.prototype.loadBuffers = function(trackList, firstRun) {
           return;
         }
         trackObj.buffer = buffer;
-        console.log(trackObj.year, loader.activeYear);
         if (trackObj.year === loader.activeYear) {
-          console.log('loading track', trackObj);
           loader.onload(trackObj);
         }
         loader.loadBuffers(trackList, firstRun);
@@ -49,6 +47,6 @@ BufferLoader.prototype.load = function() {
       return track.preview_url;
     });
 
-  pub('buffer.clearList', {});
+  events.pub('buffer.clearList', {});
   this.loadBuffers(this.urlList, true);
 };

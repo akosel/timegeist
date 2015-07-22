@@ -30,8 +30,8 @@ CrossfadePlaylist.prototype.play = function() {
       arguments.callee();
     }
 
-    pub('updateTrackInfo', { nowPlaying: ctx.trackList[ctx.playIdx] });
-    pub('addBufferImages', { tracks: ctx.getNextTracks() });
+    events.pub('updateTrackInfo', { nowPlaying: ctx.trackList[ctx.playIdx] });
+    events.pub('addBufferImages', { tracks: ctx.getNextTracks() });
     var bufferNow = ctx.trackList[ctx.playIdx].buffer;
     var playNow = createSource(bufferNow);
     var source = playNow.source;
@@ -84,7 +84,7 @@ CrossfadePlaylist.prototype.loadTrack = function(trackObj) {
     this.source.stop ? this.source.stop(0) : this.source.noteOff(0);
     this.play();
   }
-  pub('addBufferImages', { tracks: this.getNextTracks() });
+  events.pub('addBufferImages', { tracks: this.getNextTracks() });
 };
 
 CrossfadePlaylist.prototype.stop = function() {

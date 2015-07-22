@@ -1,6 +1,6 @@
 var api = {};
 
-api.getEvents = function(year) {
+api.getEvents = function(year, callback) {
   if (!year) return;
 
   var json, msgIdx;
@@ -10,7 +10,10 @@ api.getEvents = function(year) {
       // TODO not sure what to do in this case
     } else {
       msgIdx = Math.round(Math.random() * (json.length - 1));
-      pub('sendMessage', { content: json[msgIdx][1] });
+      events.pub('sendMessage', { content: json[msgIdx][1] });
+    }
+    if (callback) {
+      callback(json);
     }
   });
 }

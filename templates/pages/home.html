@@ -10,6 +10,7 @@
   <script src="/static/js/year.js"></script>
   <script src="/static/js/pubsub.js"></script>
   <script src="/static/lib/react.js"></script>
+  <script src="/static/lib/JSXTransformer.js"></script>
 
 </head>
 <body>
@@ -46,39 +47,88 @@
     <section class="message-zone"></section>
   </main>
 </body>
+<script type="text/jsx">
+  var MessageBox = React.createClass({
+    loadMessagesFromServer: function(year) {
+      api.getEvents(year, function(events) {
+        this.setState({ data: events, slice: this.getEventSlice(events) }); 
+      }.bind(this));
+    },
+    pushNewEvent: function() {
+      var idx = Math.floor(Math.random() * this.state.data.length);
+      var newSlice = this.state.slice;
+
+      // Basic check to make sure we are getting a new event 
+      var strings = newSlice.map(function(event) { return event[1] });
+      while(strings.indexOf(this.state.data[idx][1]) > -1 && this.state.data.length > this.state.slice.length) {
+        idx = Math.floor(Math.random() * this.state.data.length);
+      }
+      newSlice.unshift(this.state.data[idx]);
+      newSlice.pop();
+      this.setState({ slice: newSlice });
+    },
+    getEventSlice: function(events) {
+      var sliceSize = 3;
+      var idx = Math.floor(Math.random() * events.length - sliceSize);
+      return events.slice(idx, idx + sliceSize);
+    },
+    getInitialState: function() {
+      return { data: [], slice: [] };
+    },
+    componentDidMount: function() {
+      setInterval(function() {
+        this.pushNewEvent();
+      }.bind(this), 7000);
+      events.sub('yearChange', function(args) {
+        this.loadMessagesFromServer(args.year);
+      }.bind(this));
+    },
+    render: function() {
+      return (
+        <div className='message-box'>
+          <MessageList slice={this.state.slice} />
+        </div>
+      );
+    }
+  });
+  var MessageList = React.createClass({
+    render: function() {
+      var messageNodes = this.props.slice.map(function(message) {
+        return (
+          <Message message={message[1]}></Message>
+        );
+      });
+      return (
+          <div className='message-list'>
+            {messageNodes}
+          </div>
+      );
+    }
+  });
+  var Message = React.createClass({
+    render: function() {
+        return (
+          <p className='message'>
+            {this.props.message}
+          </p>
+        );
+    }
+  });
+
+  React.render(
+    <MessageBox />,
+    document.querySelector('.message-zone')
+  );
+</script>
 <script>
 
 window.onload = init;
 
 function init() {
-  var MessageZone = React.createClass({displayName: 'MessageZone',
-    render: function() {
-      return (
-        React.createElement('div', {className: 'message-zone'},
-          "Test"
-        )
-      );
-    }
-  });
-
-  var Message = React.createClass({
-    render: function() {
-      return (
-        React.createElement('p', {className: 'message-zone'},
-          "Test"
-        )
-      );
-    }
-  });
-  React.render(
-    React.createElement(MessageZone, null),
-    document.querySelector('.message-zone')
-  );
 
   var $body = document.querySelector('body');
   var $go = document.querySelector('#go-time');
   var $input = document.querySelector('#user-year');
-  var $messageZone = document.querySelector('.message-zone');
   var $trackInfo = document.querySelector('#track-info');
   var $goodTrack = document.querySelector('#good-track');
   var $badTrack  = document.querySelector('#bad-track');
@@ -129,11 +179,11 @@ function init() {
       writable: true
     }
   });
-  sub('yearChange', function(data) {
+  events.sub('yearChange', function(data) {
     playlist.switching = true;
     bufferLoader.activeYear = data.year;
   });
-  pub('sendMessage', { message: '', elType: 'h1' });
+  events.pub('sendMessage', { message: '', elType: 'h1' });
 
   // XXX slight hack/necessity to allow sound to play in iOS
   document.querySelector('body').addEventListener('touchstart', playSound, false);
@@ -146,15 +196,6 @@ function init() {
     source.start(0);                           // play the source now
                                                // note: on older systems, may have to use deprecated noteOn(time);
   }
-
-  var eventPublished = setInterval(function() {
-    if ($input.value) {
-      api.getEvents(activeYear);
-    } else {
-      // TODO error validation or just always have default value
-      // $messageZone.textContent = 'You done messed up.';
-    }
-  }, 7000);
 
   // TODO add this to the interface. It's kind of a cool feature
   var coastMode = false;
@@ -213,29 +254,18 @@ function init() {
       console.log('The input is invalid.');
       return false;
     }
-    while ($messageZone.firstChild) {
-      $messageZone.removeChild($messageZone.firstChild);
-    }
     activeYear = $input.value;
-    pub('yearChange', { year: activeYear });
+    events.pub('yearChange', { year: activeYear });
     getFontForYear(activeYear);
     //var colorPalette = getYearInfo(activeYear, 'colors');
     //$body.style.backgroundColor = colorPalette.background;
 
-    pub('clearTrackInfo');
-    pub('sendMessage', { message: 'Welcome to ' + activeYear + ' - ' + getMessageForYear(activeYear), elType: 'h1' });
+    events.pub('clearTrackInfo');
+    events.pub('sendMessage', { message: 'Welcome to ' + activeYear + ' - ' + getMessageForYear(activeYear), elType: 'h1' });
     searchTracks($input.value);
   }
 
-  sub('sendMessage', function(args) {
-    var elType = args.elType || 'p';
-    var $p = document.createElement(elType);
-    $p.textContent = args.content;
-    $firstP = $messageZone.querySelector(elType);
-    $messageZone.insertBefore($p, $firstP);
-  });
-
-  sub('updateTrackInfo', function(args) {
+  events.sub('updateTrackInfo', function(args) {
     var track = args.nowPlaying;
     var $name = document.querySelector('#track-name');
     var $artist = document.querySelector('#track-artist');
@@ -252,7 +282,7 @@ function init() {
     }
   });
 
-  sub('clearTrackInfo', function() {
+  events.sub('clearTrackInfo', function() {
     [].forEach.call($trackInfo.querySelectorAll('p, h1'), function($p) {
       $p.textContent = '';
     });
@@ -262,10 +292,10 @@ function init() {
     });
     $trackInfo.querySelector('#track-image').style.display = 'none';
 
-    pub('loadingIndicator', { loading: true });
+    events.pub('loadingIndicator', { loading: true });
   });
 
-  sub('loadingIndicator', function(data) {
+  events.sub('loadingIndicator', function(data) {
     var loading = data.loading || false; 
 
     if (loading) {
@@ -276,7 +306,7 @@ function init() {
     }
   });
 
-  sub('addBufferImages', function(args) {
+  events.sub('addBufferImages', function(args) {
     var tracks = args.tracks;
     var $upcoming = document.querySelector('#upcoming-tracks');
     while($upcoming.firstChild) {
@@ -291,7 +321,7 @@ function init() {
         $div.style.backgroundSize = 'contain';
         $div.className = 'thumbnail upcoming';
         $upcoming.appendChild($div);
-        pub('loadingIndicator', { loading: false });
+        events.pub('loadingIndicator', { loading: false });
       }
     });
   });
