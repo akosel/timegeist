@@ -69,6 +69,16 @@ def get_all_events():
 
     return json.dumps(all_years)
 
+@app.route('/api/v1.0/eventsno')
+def get_all_eventsno():
+    all_years = {} 
+    for year in xrange(START_YEAR, END_YEAR):
+        path = 'static/data/tidbits/tidbits_{0}.json'.format(year)
+        with open(path, 'r') as f:
+            all_years[year] =  json.loads(f.read()) 
+
+    return json.dumps(all_years)
+
 @app.route('/api/v1.0/events/<year>')
 def get_year_events(year):
     path = 'static/data/tidbits/tidbits_{0}.json'.format(year)
