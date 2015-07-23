@@ -9,12 +9,15 @@ from logging import Formatter, FileHandler
 import json
 import os
 import random
+import redis
 
 #----------------------------------------------------------------------------#
 # App Config.
 #----------------------------------------------------------------------------#
 
 app = Flask(__name__)
+redis_url = os.getenv('REDISTOGO_URL', 'redis://localhost:6379')
+r = redis.from_url(redis_url)
 #db = SQLAlchemy(app)
 
 # Automatically tear down SQLAlchemy.
@@ -40,45 +43,92 @@ def login_required(test):
 # Controllers.
 #----------------------------------------------------------------------------#
 
+START_YEAR = 1900
+END_YEAR   = 2015
 
 @app.route('/')
 def home():
+    for year in xrange(START_YEAR, END_YEAR):
+        with open('static/data/tidbits/tidbits_{0}.json'.format(year)) as f:
+            r.set('tidbits.{0}'.format(year), f.read())
+        with open('static/data/songs/charts_{0}.json'.format(year)) as f:
+            r.set('songs.{0}'.format(year), f.read())
     return render_template('pages/home.html')
+
+@app.route('/api/v1.0/events')
+def get_all_events():
+    pipe = r.pipeline(transaction=False)
+    for year in xrange(START_YEAR, END_YEAR):
+        key = 'tidbits.{0}'.format(year)
+        pipe.get(key)
+
+    all_years = {} 
+    years = pipe.execute()
+    for idx, year in enumerate(years):
+        all_years[START_YEAR + idx] = json.loads(year)
+
+    return json.dumps(all_years)
 
 @app.route('/api/v1.0/events/<year>')
 def get_year_events(year):
     path = 'static/data/tidbits/tidbits_{0}.json'.format(year)
-    if os.path.isfile(path):
+    key  = 'tidbits.{0}'.format(year)
+    if r.get(key):
+        return r.get(key) 
+    elif os.path.isfile(path):
         with open(path, 'r') as f:
-            year_data = json.load(f)
-            return json.dumps(year_data)
-    else:
-        return json.dumps({ 'status': 'empty' })
+            return f.read() 
+    return json.dumps({ 'status': 'empty' })
+
+@app.route('/api/v1.0/songs')
+def get_all_songs():
+    pipe = r.pipeline(transaction=False)
+    for year in xrange(START_YEAR, END_YEAR):
+        key = 'songs.{0}'.format(year)
+        pipe.get(key)
+
+    all_years = {} 
+    years = pipe.execute()
+    for idx, year in enumerate(years):
+        all_years[START_YEAR + idx] = json.loads(year)
+
+    return json.dumps(all_years)
+
+@app.route('/api/v1.0/songsno')
+def get_all_songsno():
+    all_years = {} 
+    for year in xrange(START_YEAR, END_YEAR):
+        path = 'static/data/songs/charts_{0}.json'.format(year)
+        with open(path, 'r') as f:
+            all_years[year] =  json.loads(f.read()) 
+
+    return json.dumps(all_years)
 
 @app.route('/api/v1.0/songs/<year>')
 def get_year_songs(year):
     path = 'static/data/songs/charts_{0}.json'.format(year)
-    if os.path.isfile(path):
+    key  = 'songs.{0}'.format(year)
+    if r.get(key):
+        print key
+        return r.get(key) 
+    elif os.path.isfile(path):
         with open(path, 'r') as f:
-            all_data = json.load(f)
-            random.shuffle(all_data)
-            return json.dumps(all_data)
-    else:
-        return json.dumps({ 'status': 'empty' })
+            return f.read() 
+    return json.dumps({ 'status': 'empty' })
 
 
 # Error handlers.
 
 
-@app.errorhandler(500)
-def internal_error(error):
-    #db_session.rollback()
-    return {}#render_template('errors/500.html'), 500
-
-
-@app.errorhandler(404)
-def not_found_error(error):
-    return {}#render_template('errors/404.html'), 404
+#@app.errorhandler(500)
+#def internal_error(error):
+#    #db_session.rollback()
+#    return {}#render_template('errors/500.html'), 500
+#
+#
+#@app.errorhandler(404)
+#def not_found_error(error):
+#    return {}#render_template('errors/404.html'), 404
 
 if not app.debug:
     file_handler = FileHandler('error.log')
