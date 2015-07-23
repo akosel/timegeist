@@ -17,7 +17,15 @@ import redis
 
 app = Flask(__name__)
 redis_url = os.getenv('REDIS_URL', 'redis://localhost:6379')
-r = redis.from_url(redis_url)
+try:
+    r = redis.from_url(redis_url)
+    r.ping()
+    print 'Connected to redis'
+except redis.ConnectionError as e:
+    print 'ERROR', e
+    r = None 
+
+
 #db = SQLAlchemy(app)
 
 # Automatically tear down SQLAlchemy.
@@ -48,18 +56,23 @@ END_YEAR   = 2015
 
 @app.route('/')
 def home():
-    for year in xrange(START_YEAR, END_YEAR):
-        r.delete('songs.{0}'.format(year))
-    for year in xrange(START_YEAR, END_YEAR):
-        with open('static/data/tidbits/tidbits_{0}.json'.format(year)) as f:
-            r.set('tidbits.{0}'.format(year), f.read())
     return render_template('pages/home.html')
 
 @app.route('/api/v1.0/events')
 def get_all_events():
+    if not r:
+        return json.dumps({})
+
+    # Check random year, and reload if empty
+    if not r.get('events.1947'):
+        print 'Cache miss. Reloading events'
+        for year in xrange(START_YEAR, END_YEAR):
+            with open('static/data/tidbits/tidbits_{0}.json'.format(year)) as f:
+                r.set('events.{0}'.format(year), f.read())
+
     pipe = r.pipeline(transaction=False)
     for year in xrange(START_YEAR, END_YEAR):
-        key = 'tidbits.{0}'.format(year)
+        key = 'events.{0}'.format(year)
         pipe.get(key)
 
     all_years = {} 
@@ -82,8 +95,8 @@ def get_all_eventsno():
 @app.route('/api/v1.0/events/<year>')
 def get_year_events(year):
     path = 'static/data/tidbits/tidbits_{0}.json'.format(year)
-    key  = 'tidbits.{0}'.format(year)
-    if r.get(key):
+    key  = 'events.{0}'.format(year)
+    if r and r.get(key):
         return r.get(key) 
     elif os.path.isfile(path):
         with open(path, 'r') as f:
@@ -92,6 +105,16 @@ def get_year_events(year):
 
 @app.route('/api/v1.0/songs')
 def get_all_songs():
+    if not r:
+        return json.dumps({})
+
+    # Check random year, and reload if empty
+    if not r.get('songs.1947'):
+        print 'Cache miss. Reloading songs'
+        for year in xrange(START_YEAR, END_YEAR):
+            with open('static/data/songs/charts_{0}.json'.format(year)) as f:
+                r.set('songs.{0}'.format(year), f.read())
+
     pipe = r.pipeline(transaction=False)
     for year in xrange(START_YEAR, END_YEAR):
         key = 'songs.{0}'.format(year)
@@ -118,7 +141,7 @@ def get_all_songsno():
 def get_year_songs(year):
     path = 'static/data/songs/charts_{0}.json'.format(year)
     key  = 'songs.{0}'.format(year)
-    if r.get(key):
+    if r and r.get(key):
         print key
         return r.get(key) 
     elif os.path.isfile(path):

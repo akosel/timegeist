@@ -4,7 +4,7 @@ api.getEvents = function(year, callback) {
   if (!year) return;
 
   var json, msgIdx;
-  get('/api/v1.0/events/' + year, function(xhr) {
+  this.get('/api/v1.0/events/' + year, function(xhr) {
     json = JSON.parse(xhr.responseText);
     if (json.status === 'empty') {
       // TODO not sure what to do in this case
@@ -21,12 +21,12 @@ api.getEvents = function(year, callback) {
 api.getSongs = function(year, callback) {
   if (!year) return;
 
-  get('/api/v1.0/songs/' + year, function(xhr) {
+  this.get('/api/v1.0/songs/' + year, function(xhr) {
     callback(xhr);
   });
 }
 
-function get(url, callback) {
+api.get = function(url, callback) {
   var xhr = new XMLHttpRequest();
   xhr.open('GET', url);
   xhr.onreadystatechange = function() {

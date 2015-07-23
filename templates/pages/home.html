@@ -84,7 +84,12 @@
         this.pushNewEvent();
       }.bind(this), 7000);
       events.sub('yearChange', function(args) {
-        this.loadMessagesFromServer(args.year);
+        if (window.cache && window.cache.events && typeof window.cache.events[args.year] !== 'undefined') {
+          var events = window.cache.events[args.year];
+          this.setState({ data: events, slice: this.getEventSlice(events) });
+        } else {
+          this.loadMessagesFromServer(args.year);
+        }
       }.bind(this));
     },
     render: function() {
@@ -132,6 +137,9 @@ window.onload = init;
 
 function init() {
 
+  window.cache = {};
+  window.bufferLoader, window.playlist;
+
   var $body = document.querySelector('body');
   var $go = document.querySelector('#go-time');
   var $input = document.querySelector('#user-year');
@@ -139,7 +147,6 @@ function init() {
   var $goodTrack = document.querySelector('#good-track');
   var $badTrack  = document.querySelector('#bad-track');
 
-  window.bufferLoader, window.playlist;
   var activeYear;
 
   // Fix up prefixing
@@ -268,7 +275,15 @@ function init() {
 
     events.pub('clearTrackInfo');
     events.pub('sendMessage', { message: 'Welcome to ' + activeYear + ' - ' + getMessageForYear(activeYear), elType: 'h1' });
-    searchTracks($input.value);
+    searchTracks($input.value, function(trackList) {
+      trackList = trackList.filter(function(track) {
+        return track.preview_url;
+      });
+
+      playlist.trackList = [];
+      bufferLoader.trackList = shuffle(trackList);
+      bufferLoader.load();
+    });
   }
 
   events.sub('updateTrackInfo', function(args) {
@@ -340,17 +355,26 @@ function init() {
 
   function searchTracks(year, callback) {
     var trackList;
-    api.getSongs(year, function(xhr) {
-      trackList = JSON.parse(xhr.responseText);
-      trackList = trackList.filter(function(track) {
-        return track.preview_url;
+    if (window.cache && window.cache.songs && typeof window.cache.songs[year] !== 'undefined') {
+      var trackList = window.cache.songs[year].slice();
+      callback(trackList);
+    } else {
+      api.getSongs(year, function(xhr) {
+        trackList = JSON.parse(xhr.responseText);
+        callback(trackList);
       });
-
-      playlist.trackList = [];
-      bufferLoader.trackList = shuffle(trackList);
-      bufferLoader.load();
-    });
+    }
   };
+
+  api.get('/api/v1.0/events', function(xhr) {
+    var obj = xhr && typeof xhr.response === 'string' ? JSON.parse(xhr.responseText) : {};
+    cache.events = obj;
+  });
+
+  api.get('/api/v1.0/songs', function(xhr) {
+    var obj = xhr && typeof xhr.response === 'string' ? JSON.parse(xhr.responseText) : {};
+    cache.songs = obj;
+  });
 
 }
 </script>
