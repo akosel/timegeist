@@ -49,10 +49,10 @@ END_YEAR   = 2015
 @app.route('/')
 def home():
     for year in xrange(START_YEAR, END_YEAR):
+        r.delete('songs.{0}'.format(year))
+    for year in xrange(START_YEAR, END_YEAR):
         with open('static/data/tidbits/tidbits_{0}.json'.format(year)) as f:
             r.set('tidbits.{0}'.format(year), f.read())
-        with open('static/data/songs/charts_{0}.json'.format(year)) as f:
-            r.set('songs.{0}'.format(year), f.read())
     return render_template('pages/home.html')
 
 @app.route('/api/v1.0/events')
