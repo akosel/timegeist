@@ -80,8 +80,23 @@
       return { data: [], slice: [] };
     },
     componentDidMount: function() {
+      document.addEventListener('visibilitychange', function() {
+        console.log('vis change', document.hidden);
+        if (document.hidden) {
+          this.setState({ slice: [] });
+          return;
+        } else {
+          this.setState({ slice: this.getEventSlice(this.state.data) });
+        }
+      }.bind(this), false);
       setInterval(function() {
-        this.pushNewEvent();
+        console.log('interval', document.hidden);
+        if (document.hidden) return;
+        if (this.state.slice.length) {
+          this.pushNewEvent();
+        } else {
+          this.setState({ slice: this.getEventSlice(this.state.data) });
+        }
       }.bind(this), 7000);
       events.sub('yearChange', function(args) {
         if (window.cache && window.cache.events && typeof window.cache.events[args.year] !== 'undefined') {
