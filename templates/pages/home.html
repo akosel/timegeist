@@ -338,8 +338,10 @@ function init() {
     if (loading) {
       $trackInfo.style.background = 'url(/static/img/clock.svg) no-repeat scroll center center';
       $trackInfo.style.backgroundSize = 'contain';
+      $badTrack.style.display = 'none';
     } else {
       $trackInfo.style.background = 'none';
+      $badTrack.style.display = 'inline-block';
     }
   });
 
