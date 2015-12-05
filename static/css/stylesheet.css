@@ -79,6 +79,8 @@ main {
       margin-top: 20px; }
   #track-info #good-track {
     display: none; }
+  #track-info #bad-track {
+    display: none; }
 
 #main-input {
   position: relative; }
