@@ -23,8 +23,24 @@
     ga('send', 'pageview');
 
   </script>
+    <style>
+        html, body {
+            margin:0;
+        }
+        #canvas {
+            position:absolute;
+            top:0;
+            left:0;
+            width:100%;
+            height:100%;
+            z-index:-1;
+            background: #fff;
+            background-size:cover;
+        }
+    </style>
 </head>
 <body>
+  <canvas id="canvas"></canvas>
   <main>
   <h1 class="logo">TimeGeist</h1>
     <section id="main-input">
@@ -63,7 +79,7 @@
   var MessageBox = React.createClass({
     loadMessagesFromServer: function(year) {
       api.getEvents(year, function(events) {
-        this.setState({ data: events, slice: this.getEventSlice(events) }); 
+        this.setState({ data: events, slice: this.getEventSlice(events) });
       }.bind(this));
     },
     pushNewEvent: function() {
@@ -72,7 +88,7 @@
       var idx = Math.floor(Math.random() * this.state.data.length);
       var newSlice = this.state.slice;
 
-      // Basic check to make sure we are getting a new event 
+      // Basic check to make sure we are getting a new event
       var strings = newSlice.map(function(event) { return event[1] });
       while(strings.indexOf(this.state.data[idx][1]) > -1 && this.state.data.length > this.state.slice.length) {
         idx = Math.floor(Math.random() * this.state.data.length);
@@ -172,7 +188,7 @@ function init() {
   var $goodTrack = document.querySelector('#good-track');
   var $badTrack  = document.querySelector('#bad-track');
 
-  var activeYear;
+  window.activeYear = undefined;
 
   // Fix up prefixing
   window.AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -343,7 +359,7 @@ function init() {
   });
 
   events.sub('loadingIndicator', function(data) {
-    var loading = data.loading || false; 
+    var loading = data.loading || false;
 
     if (loading) {
       $trackInfo.style.background = 'url(/static/img/clock.svg) no-repeat scroll center center';
@@ -404,5 +420,104 @@ function init() {
   });
 
 }
+
+</script>
+<script>
+    var canvas = document.getElementById('canvas'),
+    ctx = canvas.getContext('2d');
+
+
+
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    resize();
+    window.onresize = resize;
+
+    function noise(ctx) {
+
+        var w = ctx.canvas.width,
+            h = ctx.canvas.height,
+            idata = ctx.createImageData(w, h),
+            buffer32 = new Uint32Array(idata.data.buffer),
+            len = buffer32.length,
+            i = 0;
+
+        var jump = Math.round(300 * Math.random());
+        for(; i < len;)
+            buffer32[i+=jump] = ((255 * Math.random() % 255)|0) << 24;
+        ctx.putImageData(idata, 0, 0);
+    }
+
+    var toggle = true;
+
+    // added toggle to get 30 FPS instead of 60 FPS
+    (function loop() {
+        toggle = !toggle;
+        if (toggle) {
+            requestAnimationFrame(loop);
+            return;
+        }
+
+        if (window.activeYear) {
+        noise(ctx);
+            var fontFamily = window.getComputedStyle( document.querySelector('main'), null ).getPropertyValue( 'font-family' );
+            var font = fontFamily ? fontFamily.split(',')[0] : 'sans-serif';
+            ctx.font = "bold 400px " + font;
+            ctx.fillText(activeYear, window.innerWidth - ctx.measureText(activeYear).width, 800);
+        }
+        requestAnimationFrame(loop);
+    })();
+
+</script>
+<script>
+//var canvas = document.getElementById('canvas'),
+//    ctx = canvas.getContext('2d');
+//
+//// a variant using fixed canvas size but strecthes the result.
+//// emulates interference/bad reception
+//// using a different "noise" algo
+//canvas.width = canvas.height = 256;
+//
+//function resize() {
+//    canvas.style.width = window.innerWidth + 'px';
+//    canvas.style.height = window.innerHeight + 'px';
+//}
+//resize();
+//window.onresize = resize;
+//
+//function noise(ctx) {
+//
+//    var w = ctx.canvas.width,
+//        h = ctx.canvas.height,
+//        idata = ctx.getImageData(0, 0, w, h),
+//        buffer32 = new Uint32Array(idata.data.buffer),
+//        len = buffer32.length,
+//        i = 0,
+//        pr = 456 * Math.random(),
+//        prs = 716 * Math.random();;
+//
+//    for(; i < len;) {
+//        buffer32[i++] = ((pr % 255)|0) << 24;
+//        pr += prs * 1.2;
+//    }
+//
+//    ctx.putImageData(idata, 0, 0);
+//}
+//
+//var toggle = true;
+//
+//// added toggle to get 30 FPS instead of 60 FPS
+//(function loop() {
+//    toggle = !toggle;
+//    if (toggle) {
+//        requestAnimationFrame(loop);
+//        return;
+//    }
+//    noise(ctx);
+//    requestAnimationFrame(loop);
+//})();
+
 </script>
 </html>
