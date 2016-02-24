@@ -465,7 +465,7 @@ function init() {
             var fontFamily = window.getComputedStyle( document.querySelector('main'), null ).getPropertyValue( 'font-family' );
             var font = fontFamily ? fontFamily.split(',')[0] : 'sans-serif';
             ctx.font = "bold 400px " + font;
-            ctx.fillText(activeYear, window.innerWidth - ctx.measureText(activeYear).width, 800);
+            ctx.fillText(activeYear, window.innerWidth - ctx.measureText(activeYear).width, window.innerHeight);
         }
         requestAnimationFrame(loop);
     })();
