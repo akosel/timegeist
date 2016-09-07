@@ -1,5 +1,6 @@
 html {
-  box-sizing: border-box; }
+  box-sizing: border-box;
+  margin: 0; }
 
 *, *:before, *:after {
   box-sizing: inherit; }
@@ -11,14 +12,12 @@ body {
   background-color: #FFF;
   color: #333333; }
 
-.logo {
-  margin-bottom: 60px; }
-  .logo::before {
-    content: '';
-    background: url(/static/img/timegeist.svg) no-repeat;
-    width: 40px;
-    height: 40px;
-    float: left; }
+.logo::before {
+  content: '';
+  background: url(/static/img/timegeist.svg) no-repeat;
+  width: 40px;
+  height: 40px;
+  float: left; }
 
 main {
   position: relative;
@@ -27,199 +26,52 @@ main {
   @media screen and (min-width: 630px) {
     main {
       width: 1140px; } }
+  main header {
+    padding-top: 20px;
+    height: 150px; }
+  main #main-input {
+    margin: 0 auto;
+    font-size: 1.5em; }
 
-#track-info {
-  display: block;
-  vertical-align: top;
-  min-height: 250px;
-  width: 100%;
-  display: inline-block;
-  box-sizing: border-box; }
-  @media screen and (min-width: 630px) {
-    #track-info {
-      width: 50%; } }
-  #track-info .thumbnail {
-    width: 200px;
-    height: 200px;
-    display: inline-block;
-    vertical-align: middle;
-    -webkit-box-shadow: 5px 5px 35px -9px #5a5a5a;
-    -moz-box-shadow: 5px 5px 35px -9px #5a5a5a;
-    box-shadow: 5px 5px 35px -9px #5a5a5a; }
-    #track-info .thumbnail#track-image {
-      display: none;
-      cursor: pointer; }
-      #track-info .thumbnail#track-image:hover {
-        -webkit-box-shadow: 10px 10px 35px -9px #5a5a5a;
-        -moz-box-shadow: 10px 10px 35px -9px #5a5a5a;
-        box-shadow: 10px 10px 35px -9px #5a5a5a; }
-    #track-info .thumbnail.upcoming {
-      width: 128px;
-      height: 128px; }
-  #track-info #track-upcoming-container {
-    min-height: 350px; }
-  #track-info #upcoming-tracks {
-    margin-top: 20px; }
-    #track-info #upcoming-tracks .thumbnail {
-      margin-left: 5px; }
-  #track-info #track-view-container {
-    display: inline-block;
-    width: 100%; }
-    #track-info #track-view-container #track-stats {
-      display: inline-block;
-      font-size: 24px;
-      vertical-align: middle;
-      max-width: 300px; }
-      @media screen and (min-width: 630px) {
-        #track-info #track-view-container #track-stats {
-          padding-left: 30px; } }
-  #track-info .track-buttons {
-    margin-top: 20px; }
-    #track-info .track-buttons .button {
-      margin-top: 20px; }
-  #track-info #good-track {
-    display: none; }
-  #track-info #bad-track {
-    display: none; }
-
-#main-input {
-  position: relative; }
-  #main-input #go-time {
-    color: #666;
-    background-color: #fff;
-    border: 3px solid #666; }
-    #main-input #go-time:hover {
-      background-color: #666;
-      color: #fff; }
-  #main-input #go-random {
-    color: #edde49;
-    background-color: #fff;
-    border: 3px solid #edde49; }
-    #main-input #go-random:hover {
-      background-color: #edde49;
-      color: #fff; }
-
-.button {
-  display: inline-block;
-  padding: 17px;
+.music-controls {
   text-align: center;
-  font-family: Helvetica, sans-serif;
-  font-size: 24px;
-  width: 100%;
-  margin-top: 5px;
-  vertical-align: top;
-  height: 69px;
-  border: 3px solid #666;
-  cursor: pointer;
-  -webkit-box-shadow: 5px 5px 15px -9px #5a5a5a;
-  -moz-box-shadow: 5px 5px 15px -9px #5a5a5a;
-  box-shadow: 5px 5px 15px -9px #5a5a5a; }
-  @media screen and (min-width: 630px) {
-    .button {
-      margin: 0;
-      width: 350px; } }
-  .button:hover {
-    background-color: #666;
-    color: #fff; }
+  font-size: 5em; }
+  .music-controls .control {
+    color: #ccc;
+    cursor: pointer; }
+    .music-controls .control:hover {
+      color: #333; }
 
-.message-zone {
-  text-align: left;
-  font-size: 18px;
-  line-height: 1.6em;
-  display: inline-block;
-  box-sizing: border-box; }
-  @media screen and (min-width: 630px) {
-    .message-zone {
-      width: 50%; } }
-  .message-zone p {
-    background-color: #fff;
-    padding: 5px;
-    font-family: Helvetica, sans-serif;
-    -webkit-box-shadow: 5px 5px 5px -9px #5a5a5a;
-    -moz-box-shadow: 5px 5px 5px -9px #5a5a5a;
-    box-shadow: 5px 5px 5px -9px #5a5a5a; }
-
-/* GROUP */
 .group {
-  position: relative;
-  display: inline-block; }
+  margin-top: 30px; }
+  .group .btn {
+    width: calc(50% - 10px);
+    font-size: 1.5em;
+    padding: 5px;
+    cursor: pointer;
+    border-radius: 2px;
+    border: 2px solid #000;
+    background: transparent; }
+    .group .btn:not(:first-child) {
+      margin-left: 20px; }
+  .group.track-info {
+    height: 80px; }
 
-input {
-  font-size: 24px;
-  padding: 20px;
-  display: block;
-  width: 100%;
-  border: none;
-  border-bottom: 1px solid #666; }
-  @media screen and (min-width: 630px) {
-    input {
-      margin: 0;
-      width: 350px; } }
-
-input:focus {
-  outline: none; }
-
-/* LABEL ======================================= */
-label {
-  color: #999;
-  font-size: 24px;
-  font-weight: normal;
-  position: absolute;
-  pointer-events: none;
-  left: 10px;
-  top: 10px;
-  transition: 0.2s ease all;
-  -moz-transition: 0.2s ease all;
-  -webkit-transition: 0.2s ease all; }
-
-/* active state */
-input:focus ~ label, input:valid ~ label, input:invalid ~ label {
-  top: -30px;
-  font-size: 18px;
-  color: #666; }
-
-/* BOTTOM BARS ================================= */
-.bar {
-  position: relative;
-  display: block;
-  width: 350px; }
-
-.bar:before, .bar:after {
-  content: '';
-  height: 2px;
-  width: 0;
-  bottom: 1px;
-  position: absolute;
-  background: #666;
-  transition: 0.2s ease all;
-  -moz-transition: 0.2s ease all;
-  -webkit-transition: 0.2s ease all; }
-
-.bar:before {
-  left: 50%; }
-
-.bar:after {
-  right: 50%; }
-
-/* active state */
-input:focus ~ .bar:before, input:focus ~ .bar:after {
-  width: 50%; }
-
-/* HIGHLIGHTER ================================== */
-.highlight {
-  position: absolute;
-  height: 60%;
-  width: 100px;
-  top: 25%;
-  left: 0;
-  pointer-events: none;
-  opacity: 0.5; }
-
-/* active state */
-input:focus ~ .highlight {
-  -webkit-animation: inputHighlighter 0.3s ease;
-  -moz-animation: inputHighlighter 0.3s ease;
-  animation: inputHighlighter 0.3s ease; }
+.t-select {
+  border: 1px solid #eee;
+  border-radius: 3px;
+  margin: 0 auto; }
+  .t-select select {
+    display: inline-block;
+    font-size: 1.5em;
+    padding: 5px 8px;
+    border: none;
+    box-shadow: none;
+    background: transparent;
+    background-image: none;
+    -webkit-appearance: none; }
+  .t-select .fa {
+    font-size: 1.5em; }
 
 /* ANIMATIONS ================ */
 @-webkit-keyframes inputHighlighter {
@@ -263,11 +115,11 @@ input:focus ~ .highlight {
 
 .fade-enter.fade-enter-active {
   opacity: 1;
-  transition: opacity 0.5s ease-in; }
+  transition: opacity .5s ease-in; }
 
 .fade-leave {
   opacity: 1; }
 
 .fade-leave.fade-leave-active {
   opacity: 0.01;
-  transition: opacity 0.5s ease-in; }
+  transition: opacity .5s ease-in; }

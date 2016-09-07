@@ -10,9 +10,11 @@ $font-stack: "", Montserrat, sans-serif;
 
 $break-small: 320px;
 $break-large: 630px;
+$font-size: 1.5em;
 
 html {
   box-sizing: border-box;
+  margin:0;
 }
 *, *:before, *:after {
   box-sizing: inherit;
@@ -26,7 +28,6 @@ body {
   color: darken($white, 80%);
 }
 .logo {
-  margin-bottom: 60px;
   &::before {
     content: '';
     background: url(/static/img/timegeist.svg) no-repeat;
@@ -42,223 +43,63 @@ main {
   @media screen and (min-width: $break-large) {
     width: 1140px;
   }
-}
-#track-info {
-  display: block;
-  vertical-align: top;
-  min-height: 250px;
-  width: 100%;
-  @media screen and (min-width: $break-large) {
-    width: 50%;
+  header {
+    padding-top: 20px;
+    height: 150px;
   }
-  display:inline-block;
-  box-sizing: border-box;
-  .thumbnail {
-    width: 200px;
-    height: 200px;
-    display: inline-block;
-    vertical-align: middle;
-    -webkit-box-shadow: 5px 5px 35px -9px rgba(90,90,90,1);
-    -moz-box-shadow: 5px 5px 35px -9px rgba(90,90,90,1);
-    box-shadow: 5px 5px 35px -9px rgba(90,90,90,1);
-    &#track-image {
-      display: none;
-      cursor: pointer;
-      &:hover {
-        -webkit-box-shadow: 10px 10px 35px -9px rgba(90,90,90,1);
-        -moz-box-shadow: 10px 10px 35px -9px rgba(90,90,90,1);
-        box-shadow: 10px 10px 35px -9px rgba(90,90,90,1);
-      }
-    }
-
-    &.upcoming {
-      width: 128px;
-      height: 128px;
-    }
-  }
-  #track-upcoming-container {
-    min-height: 350px;
-  }
-  #upcoming-tracks {
-    margin-top: 20px;
-    .thumbnail {
-      margin-left: 5px;
-    }
-  }
-  #track-view-container {
-    display: inline-block;
-    width: 100%;
-    #track-stats {
-      display: inline-block;
-      font-size: 24px;
-      vertical-align: middle;
-
-      max-width: 300px;
-      @media screen and (min-width: $break-large) {
-        padding-left: 30px;
-      }
-    }
-  }
-
-  .track-buttons {
-    margin-top: 20px;
-    .button {
-      margin-top: 20px;
-    }
-  }
-  #good-track {
-    display: none;
-  }
-
-  #bad-track {
-    display: none;
+  #main-input {
+    margin: 0 auto;
+    font-size: $font-size;
   }
 }
-#main-input {
-  position: relative;
-  #go-time {
-    color: #666;
-    background-color: #fff;
-    border: 3px solid #666;
-    &:hover {
-      background-color: #666;
-      color: #fff;
-    }
-  }
-  #go-random {
-    color: darken($yellow, 20%);
-    background-color: #fff;
-    border: 3px solid darken($yellow, 20%);
-    &:hover {
-      background-color: darken($yellow, 20%);
-      color: #fff;
-    }
-  }
-}
-.button {
-  display: inline-block;
-  padding: 17px;
+
+.music-controls {
   text-align: center;
-  font-family: Helvetica, sans-serif;
-  font-size: 24px;
-  width: 100%;
-  margin-top: 5px;
-  vertical-align: top;
-  height: 69px;
-  border: 3px solid #666;
-  @media screen and (min-width: $break-large) {
-    margin: 0;
-    width: 350px;
+  font-size: 5em;
+  .control {
+    color: #ccc;
+    cursor: pointer;
+    &:hover {
+      color: #333; 
+    }
   }
-  &:hover {
-    background-color: #666;
-    color: #fff;
-  }
-  cursor: pointer;
-  -webkit-box-shadow: 5px 5px 15px -9px rgba(90,90,90,1);
-  -moz-box-shadow: 5px 5px 15px -9px rgba(90,90,90,1);
-  box-shadow: 5px 5px 15px -9px rgba(90,90,90,1);
 }
-.message-zone {
-  text-align: left;
-  font-size: 18px;
-  line-height: 1.6em;
-  display: inline-block;
-  box-sizing: border-box;
-  @media screen and (min-width: $break-large) {
-    width: 50%;
-  }
-  p {
-    background-color: #fff;
+.group {
+  margin-top: 30px;
+  .btn {
+    &:not(:first-child) {
+      margin-left: 20px;
+    }
+    width: calc(50% - 10px);  
+    font-size: $font-size;
     padding: 5px;
-    font-family: Helvetica, sans-serif;
-    -webkit-box-shadow: 5px 5px 5px -9px rgba(90,90,90,1);
-    -moz-box-shadow: 5px 5px 5px -9px rgba(90,90,90,1);
-    box-shadow: 5px 5px 5px -9px rgba(90,90,90,1);
+    cursor: pointer;
+    border-radius: 2px;
+    border: 2px solid #000;
+    background: transparent;
+  }
+  &.track-info {
+    height: 80px;
   }
 }
 
-/* GROUP */
-.group { 
-  position:relative; 
-  display:inline-block;
-}
-input {
-  font-size:24px;
-  padding: 20px;
-  display:block;
-  width: 100%;
-  @media screen and (min-width: $break-large) {
-    margin: 0;
-    width: 350px;
+.t-select {
+  border: 1px solid #eee;
+  border-radius: 3px;
+  margin: 0 auto;
+  select {
+    display: inline-block;
+    font-size: $font-size;
+    padding: 5px 8px;
+    border: none;
+    box-shadow: none;
+    background: transparent;
+    background-image: none;
+    -webkit-appearance: none;
   }
-  border:none;
-  border-bottom:1px solid #666;
-}
-input:focus { outline:none; }
-
-/* LABEL ======================================= */
-label {
-  color:#999; 
-  font-size:24px;
-  font-weight:normal;
-  position:absolute;
-  pointer-events:none;
-  left:10px;
-  top:10px;
-  transition:0.2s ease all; 
-  -moz-transition:0.2s ease all; 
-  -webkit-transition:0.2s ease all;
-}
-
-/* active state */
-input:focus ~ label, input:valid ~ label, input:invalid ~ label {
-  top:-30px;
-  font-size:18px;
-  color:#666;
-}
-
-/* BOTTOM BARS ================================= */
-.bar { position:relative; display:block; width:350px; }
-.bar:before, .bar:after {
-  content:'';
-  height:2px; 
-  width:0;
-  bottom:1px; 
-  position:absolute;
-  background:#666; 
-  transition:0.2s ease all; 
-  -moz-transition:0.2s ease all; 
-  -webkit-transition:0.2s ease all;
-}
-.bar:before {
-  left:50%;
-}
-.bar:after {
-  right:50%; 
-}
-
-/* active state */
-input:focus ~ .bar:before, input:focus ~ .bar:after {
-  width:50%;
-}
-
-/* HIGHLIGHTER ================================== */
-.highlight {
-  position:absolute;
-  height:60%; 
-  width:100px; 
-  top:25%; 
-  left:0;
-  pointer-events:none;
-  opacity:0.5;
-}
-
-/* active state */
-input:focus ~ .highlight {
-  -webkit-animation:inputHighlighter 0.3s ease;
-  -moz-animation:inputHighlighter 0.3s ease;
-  animation:inputHighlighter 0.3s ease;
+  .fa {
+    font-size: $font-size;
+  }
 }
 
 /* ANIMATIONS ================ */
