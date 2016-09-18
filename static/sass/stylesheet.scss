@@ -79,8 +79,23 @@ main {
     background: transparent;
   }
   &.track-info {
-    height: 80px;
+    height: 150px;
   }
+}
+
+.column {
+    &.half {
+        display: inline-block;
+        width: 50%;
+    }
+    &.one-quarter {
+        display: inline-block;
+        width: 25%;
+    }
+    &.three-quarters {
+        display: inline-block;
+        width: 75%;
+    }
 }
 
 .t-select {

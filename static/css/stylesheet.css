@@ -55,7 +55,19 @@ main {
     .group .btn:not(:first-child) {
       margin-left: 20px; }
   .group.track-info {
-    height: 80px; }
+    height: 150px; }
+
+.column.half {
+  display: inline-block;
+  width: 50%; }
+
+.column.one-quarter {
+  display: inline-block;
+  width: 25%; }
+
+.column.three-quarters {
+  display: inline-block;
+  width: 75%; }
 
 .t-select {
   border: 1px solid #eee;

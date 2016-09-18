@@ -10,8 +10,10 @@ function init() {
   var $play = $main.querySelector('#play');
   var $previous = $main.querySelector('#back');
   var $next = $main.querySelector('#next');
+  var $volume = $main.querySelector('#volume');
   var $trackInfo = $main.querySelector('.track-info');
   var $trackList = $main.querySelector('.track-list');
+  var setProgress = progress();
 
   window.activeYear = undefined;
 
@@ -38,6 +40,10 @@ function init() {
     context: {
       value: context,
       writable: true
+    },
+    setProgress: {
+      value: setProgress,
+      writable: false
     }
   });
 
@@ -112,12 +118,29 @@ function init() {
     }
   }
 
+  function setControlClass($btn, toAdd, toRemove) {
+    $btn.classList.remove(toRemove);
+    $btn.classList.add(toAdd);
+  }
+
   function setPlayPauseButton(className) {
     var $btn = $play.querySelector('i');
     var toRemove = className === 'fa-play' ? 'fa-pause' : 'fa-play';
-    $btn.classList.remove(toRemove);
-    $btn.classList.add(className);
+    setControlClass($btn, className, toRemove);
   }
+
+
+  $volume.addEventListener('click', function(event) {
+    var $btn = $volume.querySelector('i');
+    var toAdd = $btn.classList.contains('fa-volume-up') ? 'fa-volume-off' : 'fa-volume-up';
+    var toRemove = $btn.classList.contains('fa-volume-up') ? 'fa-volume-up' : 'fa-volume-off';
+    setControlClass($btn, toAdd, toRemove);
+    if (toAdd === 'fa-volume-up') {
+       playlist.unmute();
+    } else {
+       playlist.mute();
+    }
+  });
 
   $randomYearButton.addEventListener('click', function(event) {
     $input.value = getRandomArbitrary(1899, 2014);
