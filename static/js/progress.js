@@ -16,7 +16,7 @@ window.progress = function() {
     var svg = d3.select("svg"),
         width = +svg.attr("width"),
         height = +svg.attr("height"),
-        g = svg.append("g").attr("transform", "translate(" + (width - OUTER_RADIUS) + "," + height / 2 + ")");
+        g = svg.append("g").attr("transform", "translate(" + (width - OUTER_RADIUS * 2) + "," + height / 2 + ")");
 
     // Add the background arc, from 0 to 100% (tau).
     var background = g.append("path")

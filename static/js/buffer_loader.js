@@ -2,10 +2,19 @@
 function BufferLoader() {}
 BufferLoader.prototype.constructor = BufferLoader;
 BufferLoader.prototype.loadBuffers = function(trackList, firstRun) {
+  var loader = this;
   events.sub('buffer.clearList', function(data) {
+    loader.bufferCount = 0;
     trackList = [];
   });
   if (!trackList || !trackList.length) {
+    return;
+  }
+  if (loader.bufferCount >= 5) {
+    setTimeout(function() {
+        loader.bufferCount -= 1;
+        loader.loadBuffers(trackList, firstRun);
+    }, 10000);
     return;
   }
   // Load buffer asynchronously
@@ -13,7 +22,6 @@ BufferLoader.prototype.loadBuffers = function(trackList, firstRun) {
   var trackObj = trackList.pop();
   request.open("GET", trackObj.preview_url, true);
   request.responseType = "arraybuffer";
-  var loader = this;
   request.onload = function() {
     // Asynchronously decode the audio file data in request.response
     loader.context.decodeAudioData(
@@ -23,6 +31,7 @@ BufferLoader.prototype.loadBuffers = function(trackList, firstRun) {
           alert('error decoding file data: ' + trackObj.preview_url);
           return;
         }
+        loader.bufferCount += 1;
         trackObj.buffer = buffer;
         if (trackObj.year === loader.activeYear) {
           loader.onload(trackObj);
@@ -48,5 +57,6 @@ BufferLoader.prototype.load = function() {
     });
 
   events.pub('buffer.clearList', {});
+  this.bufferCount = 0;
   this.loadBuffers(this.urlList, true);
 };

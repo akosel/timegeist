@@ -22,9 +22,11 @@ body {
 main {
   position: relative;
   overflow: visible;
-  margin: auto; }
-  @media screen and (min-width: 630px) {
+  margin: auto;
+  padding: 25px; }
+  @media screen and (min-width: 1280px) {
     main {
+      padding: 0px;
       width: 1140px; } }
   main header {
     padding-top: 20px;
@@ -45,17 +47,21 @@ main {
 .group {
   margin-top: 30px; }
   .group .btn {
-    width: calc(50% - 10px);
+    width: 100%;
+    margin-top: 10px;
     font-size: 1.5em;
-    padding: 5px;
+    padding: 10px;
     cursor: pointer;
     border: none;
     text-transform: uppercase;
-    font-family: "brandon-grotesque";
+    font-family: "brandon-grotesque", sans-serif;
     background: #000;
     color: #fff; }
-    .group .btn:not(:first-child) {
-      margin-left: 20px; }
+    @media screen and (min-width: 1280px) {
+      .group .btn {
+        width: calc(50% - 10px); }
+        .group .btn:not(:first-child) {
+          margin-left: 20px; } }
   .group.track-info {
     height: 150px; }
 
@@ -78,7 +84,7 @@ main {
   .t-select select {
     display: inline-block;
     font-size: 1.5em;
-    font-family: "brandon-grotesque";
+    font-family: "brandon-grotesque", sans-serif;
     padding: 5px 8px;
     border: none;
     box-shadow: none;

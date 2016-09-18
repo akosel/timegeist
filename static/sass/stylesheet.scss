@@ -9,7 +9,8 @@ $white: #FFF;
 $font-stack: "", Montserrat, sans-serif;
 
 $break-small: 320px;
-$break-large: 630px;
+$break-medium: 680px;
+$break-large: 1280px;
 $font-size: 1.5em;
 
 html {
@@ -40,7 +41,9 @@ main {
   position: relative;
   overflow: visible;
   margin: auto;
+  padding: 25px;
   @media screen and (min-width: $break-large) {
+    padding: 0px;
     width: 1140px;
   }
   header {
@@ -60,23 +63,27 @@ main {
     color: #ccc;
     cursor: pointer;
     &:hover {
-      color: #333; 
+      color: #333;
     }
   }
 }
 .group {
   margin-top: 30px;
   .btn {
-    &:not(:first-child) {
-      margin-left: 20px;
+    width: 100%;
+    margin-top: 10px;
+    @media screen and (min-width: $break-large) {
+      &:not(:first-child) {
+        margin-left: 20px;
+      }
+      width: calc(50% - 10px);
     }
-    width: calc(50% - 10px);  
     font-size: $font-size;
-    padding: 5px;
+    padding: 10px;
     cursor: pointer;
     border: none;
     text-transform: uppercase;
-    font-family: "brandon-grotesque";
+    font-family: "brandon-grotesque", sans-serif;
     background: #000;
     color: #fff;
   }
@@ -107,7 +114,7 @@ main {
   select {
     display: inline-block;
     font-size: $font-size;
-    font-family: "brandon-grotesque";
+    font-family: "brandon-grotesque", sans-serif;
     padding: 5px 8px;
     border: none;
     box-shadow: none;
