@@ -194,6 +194,7 @@ function init() {
       });
 
       playlist.trackList = [];
+      playlist.stoppedAt = undefined;
       bufferLoader.trackList = shuffle(trackList);
       bufferLoader.load();
     });

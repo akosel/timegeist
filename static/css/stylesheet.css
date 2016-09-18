@@ -78,6 +78,7 @@ main {
   .t-select select {
     display: inline-block;
     font-size: 1.5em;
+    font-family: "brandon-grotesque";
     padding: 5px 8px;
     border: none;
     box-shadow: none;
