@@ -91,7 +91,7 @@ function init() {
     } else {
       clearInterval(coasting);
     }
-  }, 25000);
+  }, 30000);
 
   document.onkeyup = function(e) {
     if (e.keyCode === 13) {
@@ -182,9 +182,8 @@ function init() {
     }
     activeYear = $input.value;
     events.pub('yearChange', { year: activeYear });
-    getFontForYear(activeYear);
-    //var colorPalette = getYearInfo(activeYear, 'colors');
-    //$body.style.backgroundColor = colorPalette.background;
+    //getFontForYear(activeYear);
+    //getColorsForYear(activeYear);
 
     events.pub('clearTrackInfo');
     events.pub('sendMessage', { message: 'Welcome to ' + activeYear + ' - ' + getMessageForYear(activeYear), elType: 'h1' });
@@ -214,38 +213,6 @@ function init() {
       $p.textContent = '';
     });
 
-    //events.pub('loadingIndicator', { loading: true });
-  });
-
-  events.sub('loadingIndicator', function(data) {
-    var loading = data.loading || false;
-
-    if (loading) {
-      $trackInfo.style.background = 'url(/static/img/clock.svg) no-repeat scroll center center';
-      $trackInfo.style.backgroundSize = 'contain';
-    } else {
-      $trackInfo.style.background = 'none';
-    }
-  });
-
-  events.sub('addBufferImages', function(args) {
-    var tracks = args.tracks;
-    var $upcoming = document.querySelector('#upcoming-tracks');
-    while($upcoming.firstChild) {
-      $upcoming.removeChild($upcoming.firstChild);
-    }
-    var $div;
-    tracks.forEach(function(track) {
-      if (track && track.album && track.album.images && track.album.images.length > 1) {
-        $div = document.createElement('div');
-        var albumImgUrl = track.album.images[1].url;
-        $div.style.background = 'url(' + albumImgUrl + ') no-repeat';
-        $div.style.backgroundSize = 'contain';
-        $div.className = 'thumbnail upcoming';
-        $upcoming.appendChild($div);
-        events.pub('loadingIndicator', { loading: false });
-      }
-    });
   });
 
   function shuffle(o){
@@ -265,11 +232,6 @@ function init() {
       });
     }
   };
-
-  api.get('/api/v1.0/events', function(xhr) {
-    var obj = xhr && typeof xhr.response === 'string' ? JSON.parse(xhr.responseText) : {};
-    cache.events = obj;
-  });
 
   api.get('/api/v1.0/songs', function(xhr) {
     var obj = xhr && typeof xhr.response === 'string' ? JSON.parse(xhr.responseText) : {};

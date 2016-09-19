@@ -143,25 +143,39 @@ var yearConfig = {
 }
 
 function getYearInfo(year, prop) {
-  if (year < 1910) { year = 1910; } 
-  else if (year < 1920) { year = 1920; } 
-  else if (year < 1930) { year = 1930; } 
-  else if (year < 1940) { year = 1940; } 
-  else if (year < 1950) { year = 1950; } 
-  else if (year < 1960) { year = 1960; } 
-  else if (year < 1970) { year = 1970; } 
-  else if (year < 1980) { year = 1980; } 
-  else if (year < 1990) { year = 1990; } 
-  else if (year < 2000) { year = 2000; } 
-  else if (year < 2010) { year = 2010; } 
-  else if (year < 2020) { year = 2020; } 
-  return yearConfig[year][prop]; 
+  if (year < 1910) { year = 1910; }
+  else if (year < 1920) { year = 1920; }
+  else if (year < 1930) { year = 1930; }
+  else if (year < 1940) { year = 1940; }
+  else if (year < 1950) { year = 1950; }
+  else if (year < 1960) { year = 1960; }
+  else if (year < 1970) { year = 1970; }
+  else if (year < 1980) { year = 1980; }
+  else if (year < 1990) { year = 1990; }
+  else if (year < 2000) { year = 2000; }
+  else if (year < 2010) { year = 2010; }
+  else if (year < 2020) { year = 2020; }
+  return yearConfig[year][prop];
 }
 
 // Year functions
 function getFontForYear(year) {
   var $body = document.querySelector('main');
   $body.className = getYearInfo(year, 'fontClass');
+}
+
+function getColorsForYear(year) {
+  var colorPalette = getYearInfo(year, 'colors');
+  var $body = document.querySelector('body');
+  $body.style.backgroundColor = colorPalette.background;
+  var buttons = document.querySelectorAll('.btn');
+  buttons.forEach(function(button) {
+    button.style.background = colorPalette.primary;
+  });
+  var controls = document.querySelectorAll('.control');
+  controls.forEach(function(control) {
+    control.style.color = colorPalette.primary;
+  });
 }
 
 function getMessageForYear(year) {
