@@ -80,6 +80,7 @@ main {
 .t-select {
   border: 1px solid #eee;
   border-radius: 3px;
+  width: 140px;
   margin: 0 auto; }
   .t-select select {
     display: inline-block;
