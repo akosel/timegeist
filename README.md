@@ -1,6 +1,4 @@
 # timegeist
-Under construction
-
 
 ### What is this?
 
@@ -17,10 +15,6 @@ Beyond that, on the frontend I was able to try out the [AudioContext Web API](ht
 On the backend, this uses Flask. There isn't a lot going on here. I made a basic (GET only) REST API for accessing songs and events. I would like to incorporate an actual database for loading data (I just use JSON for now). Also, playing with Redis is a goal of mine, so I might see if that makes sense here too. At this point, I believe all of the data used could be stored in memory, which would speed up the page's responsiveness.
 
 ### TODO
-* Stop, start, and skip buttons in the interface
 * Faster initial song loading (i.e. load the first song, AND THEN load the remaining songs from that year).
 * Use a real database (currently, the API loads JSON files saved on disk).
 * Incorporate images into the notable events stream
-* Break Javascript into modules
-* Implement basic pub/sub system for decoupling frontend components
-* Store data in S3
