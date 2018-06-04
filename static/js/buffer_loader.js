@@ -20,7 +20,7 @@ BufferLoader.prototype.loadBuffers = function(trackList, firstRun) {
   // Load buffer asynchronously
   var request = new XMLHttpRequest();
   var trackObj = trackList.pop();
-  request.open("GET", trackObj.preview_url, true);
+  request.open("GET", trackObj.url, true);
   request.responseType = "arraybuffer";
   request.onload = function() {
     // Asynchronously decode the audio file data in request.response
@@ -28,7 +28,7 @@ BufferLoader.prototype.loadBuffers = function(trackList, firstRun) {
       request.response,
       function(buffer) {
         if (!buffer) {
-          alert('error decoding file data: ' + trackObj.preview_url);
+          alert('error decoding file data: ' + trackObj.url);
           return;
         }
         loader.bufferCount += 1;
@@ -53,8 +53,9 @@ BufferLoader.prototype.load = function() {
   var self = this;
   this.urlList = this.trackList
     .filter(function(track) {
-      return track.preview_url;
+      return track.url;
     });
+  console.log(this.urlList);
 
   events.pub('buffer.clearList', {});
   this.bufferCount = 0;

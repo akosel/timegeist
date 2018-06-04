@@ -60,13 +60,13 @@ function init() {
       value: playlist.loadTrack.bind(playlist)
     },
     activeYear: {
-      value: activeYear,
+      value: parseInt(activeYear),
       writable: true
     }
   });
   events.sub('yearChange', function(data) {
     playlist.switching = true;
-    bufferLoader.activeYear = data.year;
+    bufferLoader.activeYear = parseInt(data.year);
   });
   events.pub('sendMessage', { message: '', elType: 'h1' });
 
@@ -95,11 +95,11 @@ function init() {
 
   document.onkeyup = function(e) {
     if (e.keyCode === 13) {
-      if (activeYear !== $input.value) {
+      if (activeYear !== parseInt($input.value)) {
         fireItUp();
       }
     } else if (e.keyCode === 32) {
-      if (activeYear !== $input.value) {
+      if (activeYear !== parseInt($input.value)) {
         playlist.toggle();
       }
     }
@@ -144,14 +144,14 @@ function init() {
 
   $randomYearButton.addEventListener('click', function(event) {
     $input.value = getRandomArbitrary(1899, 2014);
-    if (activeYear !== $input.value) {
+    if (activeYear !== parseInt($input.value)) {
       setPlayPauseButton('fa-pause');
       fireItUp();
     }
   });
 
   $play.addEventListener('click', function(event) {
-    if (activeYear !== $input.value) {
+    if (activeYear !== parseInt($input.value)) {
       setPlayPauseButton('fa-pause');
       fireItUp();
     } else {
@@ -161,7 +161,7 @@ function init() {
   });
 
   $userYearButton.addEventListener('click', function(event) {
-    if (activeYear !== $input.value) {
+    if (activeYear !== parseInt($input.value)) {
       setPlayPauseButton('fa-pause');
       fireItUp();
     }
@@ -180,16 +180,14 @@ function init() {
       console.log('The input is invalid.');
       return false;
     }
-    activeYear = $input.value;
+    activeYear = parseInt($input.value);
     events.pub('yearChange', { year: activeYear });
-    //getFontForYear(activeYear);
-    //getColorsForYear(activeYear);
 
     events.pub('clearTrackInfo');
     events.pub('sendMessage', { message: 'Welcome to ' + activeYear + ' - ' + getMessageForYear(activeYear), elType: 'h1' });
     searchTracks($input.value, function(trackList) {
       trackList = trackList.filter(function(track) {
-        return track.preview_url;
+        return track.url;
       });
 
       playlist.trackList = [];
@@ -233,9 +231,5 @@ function init() {
     }
   };
 
-  api.get('/api/v1.0/songs', function(xhr) {
-    var obj = xhr && typeof xhr.response === 'string' ? JSON.parse(xhr.responseText) : {};
-    cache.songs = obj;
-  });
-
+  window.cache.songs = {};
 }

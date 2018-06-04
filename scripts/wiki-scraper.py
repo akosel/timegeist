@@ -1,15 +1,15 @@
 from bs4 import BeautifulSoup
 import datetime
 import time
-import urlparse
-import urllib
+import urllib.request
+import urllib.parse
 import json
 import argparse
 import dateutil.parser
 
 
 def get(url):
-    response = urllib.urlopen(url)
+    response = urllib.request.urlopen(url)
     data = json.loads(response.read())
     return data
 
@@ -20,15 +20,15 @@ def get_year_info(year):
             'format': 'json',
             'action': 'query'
           }
-    query_string = urllib.urlencode(query_params)
+    query_string = urllib.parse.urlencode(query_params)
     wiki_url = 'https://en.wikipedia.org/w/api.php?{0}'.format(query_string)
     d = get(wiki_url)
-    print 'Retrieved data for {0}'.format(year)
+    print('Retrieved data for {0}'.format(year))
     return d
 
 def get_year_range(start, end):
     big_data = {}
-    for year in xrange(start, end):
+    for year in range(start, end):
         tmp = get_year_info(year)
         # XXX Should only be one key. Wiki API does not allow for multiple extracts at one time
         page_ids = tmp['query']['pages'].keys()
@@ -50,7 +50,6 @@ def get_tidbits(title, extract):
     for ul in soup.find_all('ul'):
         for li in ul.find_all('li'):
             if li.find('ul'):
-                #print li.contents
                 try:
                     active_date = li.contents[0].strip()
                 except:
@@ -60,7 +59,7 @@ def get_tidbits(title, extract):
                     try:
                         tidbits.append(text_to_tuple(nested_li_text, title))
                         if len(tidbits) > 1 and dateutil.parser.parse(tidbits[-1][0]) < dateutil.parser.parse(tidbits[-2][0]):
-                            print li.text, dateutil.parser.parse(tidbits[-1][0])
+                            print(li.text, dateutil.parser.parse(tidbits[-1][0]))
                             return tidbits[:-1]
                     except Exception as e:
                         continue
@@ -71,7 +70,7 @@ def get_tidbits(title, extract):
             except Exception as e:
                 continue
             if len(tidbits) > 1 and dateutil.parser.parse(tidbits[-1][0]) < dateutil.parser.parse(tidbits[-2][0]):
-                print li.text, dateutil.parser.parse(tidbits[-1][0])
+                print(li.text, dateutil.parser.parse(tidbits[-1][0]))
                 return tidbits[:-1]
     return tidbits
 
@@ -96,8 +95,8 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     if args.verbose:
-        print args
+        print(args)
     if args.dry_run:
-        print 'Will run on range {0} to {1}'.format(args.start, args.end)
+        print('Will run on range {0} to {1}'.format(args.start, args.end))
     else:
         get_year_range(args.start, args.end)
