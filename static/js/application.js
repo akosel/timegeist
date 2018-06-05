@@ -129,8 +129,13 @@ function init() {
     setControlClass($btn, className, toRemove);
   }
 
+  function contextResumeEventListenerWrapper(cb) {
+    return function(event) {
+      context.resume().then(cb.apply(this, arguments));
+    };
+  }
 
-  $volume.addEventListener('click', function(event) {
+  $volume.addEventListener('click', contextResumeEventListenerWrapper(function(event) {
     var $btn = $volume.querySelector('i');
     var toAdd = $btn.classList.contains('fa-volume-up') ? 'fa-volume-off' : 'fa-volume-up';
     var toRemove = $btn.classList.contains('fa-volume-up') ? 'fa-volume-up' : 'fa-volume-off';
@@ -140,17 +145,19 @@ function init() {
     } else {
        playlist.mute();
     }
-  });
+  }));
 
-  $randomYearButton.addEventListener('click', function(event) {
-    $input.value = getRandomArbitrary(1899, 2014);
-    if (activeYear !== parseInt($input.value)) {
-      setPlayPauseButton('fa-pause');
-      fireItUp();
-    }
-  });
+  $randomYearButton.addEventListener('click', contextResumeEventListenerWrapper(function(event) {
+    context.resume().then(() => {
+        $input.value = getRandomArbitrary(1899, 2014);
+        if (activeYear !== parseInt($input.value)) {
+        setPlayPauseButton('fa-pause');
+        fireItUp();
+        }
+    });
+  }));
 
-  $play.addEventListener('click', function(event) {
+  $play.addEventListener('click', contextResumeEventListenerWrapper(function(event) {
     if (activeYear !== parseInt($input.value)) {
       setPlayPauseButton('fa-pause');
       fireItUp();
@@ -158,14 +165,14 @@ function init() {
       togglePlayPauseButton();
       playlist.toggle();
     }
-  });
+  }));
 
-  $userYearButton.addEventListener('click', function(event) {
+  $userYearButton.addEventListener('click', contextResumeEventListenerWrapper(function(event) {
     if (activeYear !== parseInt($input.value)) {
       setPlayPauseButton('fa-pause');
       fireItUp();
     }
-  });
+  }));
 
   $previous.addEventListener('click', function(event) {
     playlist.previous();
