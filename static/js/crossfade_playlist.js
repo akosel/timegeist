@@ -22,7 +22,14 @@ CrossfadePlaylist.prototype.play = function() {
   }
 
   function playHelper() {
-    ctx.playIdx = ctx.playIdx === ctx.trackList.length - 1 ? 0 : ctx.playIdx;
+    if(!ctx.trackList || !ctx.trackList.length) {
+      return;
+    }
+    if (ctx.trackList.length - 1 === ctx.playIdx) {
+      ctx.playIdx = 0;
+    } else if (ctx.playIdx < 0) {
+      ctx.playIdx = ctx.trackList.length - 1;
+    }
     if(!ctx.trackList[ctx.playIdx]) {
       arguments.callee();
     }

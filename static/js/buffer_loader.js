@@ -1,28 +1,36 @@
 // Nice helpers from http://www.html5rocks.com/en/tutorials/webaudio/intro/
 function BufferLoader() {}
 BufferLoader.prototype.constructor = BufferLoader;
-BufferLoader.prototype.loadBuffers = function(trackList, firstRun) {
-  var loader = this;
-  events.sub('buffer.clearList', function(data) {
-    loader.bufferCount = 0;
-    trackList = [];
-  });
-  if (!trackList || !trackList.length) {
-    return;
+BufferLoader.prototype.reset = function() {
+  while (this.timeouts.length) {
+    clearTimeout(this.timeouts.pop());
   }
-  if (loader.bufferCount >= 5) {
-    setTimeout(function() {
-        loader.bufferCount -= 1;
-        loader.loadBuffers(trackList, firstRun);
-    }, 10000);
+  while (this.requests.length) {
+    this.requests.pop().abort();
+  }
+};
+BufferLoader.prototype.loadBuffers = function() {
+  const loaded = this.trackList.filter(function(track) {
+    return track.buffer;
+  });
+  console.log(loaded.map(t => t.name));
+  const backoff = Math.min(loaded.length * 1000, 5000);
+  console.log('backoff', loaded.length, backoff);
+  this.timeouts.push(setTimeout(this._loadBuffers.bind(this), backoff));
+}
+BufferLoader.prototype._loadBuffers = function() {
+  var loader = this;
+  if (!this.urlList || !this.urlList.length) {
     return;
   }
   // Load buffer asynchronously
   var request = new XMLHttpRequest();
-  var trackObj = trackList.pop();
+  this.requests.push(request);
+  var trackObj = this.urlList.pop();
   request.open("GET", trackObj.url, true);
   request.responseType = "arraybuffer";
   request.onload = function() {
+    console.log('year', trackObj.year);
     // Asynchronously decode the audio file data in request.response
     loader.context.decodeAudioData(
       request.response,
@@ -31,16 +39,15 @@ BufferLoader.prototype.loadBuffers = function(trackList, firstRun) {
           alert('error decoding file data: ' + trackObj.url);
           return;
         }
-        loader.bufferCount += 1;
         trackObj.buffer = buffer;
         if (trackObj.year === loader.activeYear) {
           loader.onload(trackObj);
         }
-        loader.loadBuffers(trackList, firstRun);
+        loader.loadBuffers();
       },
       function(error) {
         console.log('decodeAudioData error', error);
-        loader.loadBuffers(trackList, firstRun);
+        loader.loadBuffers();
       }
     );
   }
@@ -55,9 +62,7 @@ BufferLoader.prototype.load = function() {
     .filter(function(track) {
       return track.url;
     });
-  console.log(this.urlList);
 
   events.pub('buffer.clearList', {});
-  this.bufferCount = 0;
-  this.loadBuffers(this.urlList, true);
+  this.loadBuffers();
 };

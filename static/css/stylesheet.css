@@ -59,7 +59,7 @@ main {
     color: #fff; }
     @media screen and (min-width: 1280px) {
       .group .btn {
-        width: calc(50% - 10px); }
+        width: calc(100% - 10px); }
         .group .btn:not(:first-child) {
           margin-left: 20px; } }
   .group.track-info {

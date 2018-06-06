@@ -4,7 +4,6 @@ function init() {
   window.bufferLoader, window.playlist;
 
   var $main = document.querySelector('main');
-  var $userYearButton = $main.querySelector('.btn-user-year');
   var $randomYearButton = $main.querySelector('.btn-random-year');
   var $input = $main.querySelector('#year');
   var $play = $main.querySelector('#play');
@@ -14,8 +13,9 @@ function init() {
   var $trackInfo = $main.querySelector('.track-info');
   var $trackList = $main.querySelector('.track-list');
   var setProgress = progress();
+  var userHasInteracted = false;
 
-  window.activeYear = undefined;
+  var DEFAULT_YEAR = 2001;
 
   // Fix up prefixing
   window.AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -52,6 +52,10 @@ function init() {
       value: context,
       writable: true
     },
+    urlList: {
+      value: [],
+      writable: true
+    },
     trackList: {
       value: [],
       writable: true
@@ -60,18 +64,40 @@ function init() {
       value: playlist.loadTrack.bind(playlist)
     },
     activeYear: {
-      value: parseInt(activeYear),
+      value: '',
       writable: true
-    }
+    },
+    CONCURRENT_CONNECTIONS: {
+      value: 1,
+      writable: true
+    },
+    requests: {
+      value: [],
+      writable: true
+    },
+    timeouts: {
+      value: [],
+      writable: true
+    },
+  });
+  events.sub('buffer.clearList', function(data) {
+    bufferLoader.reset();
   });
   events.sub('yearChange', function(data) {
     playlist.switching = true;
-    bufferLoader.activeYear = parseInt(data.year);
+    updateYear(data.year);
   });
   events.pub('sendMessage', { message: '', elType: 'h1' });
 
   // XXX slight hack/necessity to allow sound to play in iOS
   document.querySelector('body').addEventListener('touchstart', playSound, false);
+  updateYear(DEFAULT_YEAR);
+
+  function updateYear(year) {
+    activeYear = year;
+    bufferLoader.activeYear = parseInt(year);
+    let verb = playlist.playing ? 'Listening' : 'Listen';
+  }
 
   // XXX Truly temporary
   function playSound(buffer) {
@@ -148,17 +174,15 @@ function init() {
   }));
 
   $randomYearButton.addEventListener('click', contextResumeEventListenerWrapper(function(event) {
-    context.resume().then(() => {
-        $input.value = getRandomArbitrary(1899, 2014);
-        if (activeYear !== parseInt($input.value)) {
-        setPlayPauseButton('fa-pause');
-        fireItUp();
-        }
-    });
+    $input.value = getRandomArbitrary(1899, 2014);
+    if (activeYear !== parseInt($input.value)) {
+      setPlayPauseButton('fa-pause');
+      fireItUp();
+    }
   }));
 
   $play.addEventListener('click', contextResumeEventListenerWrapper(function(event) {
-    if (activeYear !== parseInt($input.value)) {
+    if (!userHasInteracted) {
       setPlayPauseButton('fa-pause');
       fireItUp();
     } else {
@@ -167,15 +191,15 @@ function init() {
     }
   }));
 
-  $userYearButton.addEventListener('click', contextResumeEventListenerWrapper(function(event) {
+  $previous.addEventListener('click', function(event) {
+    playlist.previous();
+  });
+
+  $input.addEventListener('change', function(event) {
     if (activeYear !== parseInt($input.value)) {
       setPlayPauseButton('fa-pause');
       fireItUp();
     }
-  }));
-
-  $previous.addEventListener('click', function(event) {
-    playlist.previous();
   });
 
   $next.addEventListener('click', function(event) {
@@ -187,8 +211,8 @@ function init() {
       console.log('The input is invalid.');
       return false;
     }
-    activeYear = parseInt($input.value);
-    events.pub('yearChange', { year: activeYear });
+    events.pub('yearChange', { year: parseInt($input.value) });
+    userHasInteracted = true;
 
     events.pub('clearTrackInfo');
     events.pub('sendMessage', { message: 'Welcome to ' + activeYear + ' - ' + getMessageForYear(activeYear), elType: 'h1' });
