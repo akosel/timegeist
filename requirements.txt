@@ -59,6 +59,6 @@ traitlets==4.3.2
 urllib3==1.22
 wcwidth==0.1.7
 webencodings==0.5.1
-Werkzeug==0.9.4
+Werkzeug==0.15.3
 widgetsnbextension==3.2.1
 WTForms==1.0.5
